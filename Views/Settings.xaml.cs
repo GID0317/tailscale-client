@@ -68,8 +68,7 @@ public sealed partial class Settings : Page, INotifyPropertyChanged
 
             foreach (var device in peers)
             {
-                var dnsName = device.DNSName;
-                var nickname = dnsName.Split(".")[0];
+                var nickname = device.DNSName?.Split('.')[0] ?? "";
                 if (nickname == "")
                 {
                     nickname = device.HostName;
@@ -96,7 +95,7 @@ public sealed partial class Settings : Page, INotifyPropertyChanged
         IncomingTrafficEnabled = !_prefs.ShieldsUp;
         TailscaleDnsEnabled = _prefs.CorpDNS;
         SubnetRoutesEnabled = _prefs.RouteAll;
-        ExitNode = _prefs.ExitNodeID;
+        ExitNode = _prefs.ExitNodeID ?? "";
         var advertisedRoutes = _prefs.AdvertiseRoutes ?? [];
         AdvertiseExitNodeEnabled = advertisedRoutes.Contains("0.0.0.0/0") && advertisedRoutes.Contains("::/0");
 
@@ -118,7 +117,7 @@ public sealed partial class Settings : Page, INotifyPropertyChanged
         peers.Sort((x, y) => x.ID == suggestedNode.ID ? -1 : y.ID == suggestedNode.ID ? 1 : 0);
 
         var peerIds = peers.Select(x => x.ID).ToList();
-        if (!peerIds.SequenceEqual(_peerIds) || suggestedNode.ID != _recommendedNode)
+        if (ExitNodeList.Items.Count == 0 || !peerIds.SequenceEqual(_peerIds) || suggestedNode.ID != _recommendedNode)
         {
             _peerIds = peerIds;
             _recommendedNode = suggestedNode.ID;
@@ -126,6 +125,7 @@ public sealed partial class Settings : Page, INotifyPropertyChanged
         }
 
         CurrentNode = ExitNodeList.Items.Cast<ComboBoxItem>().ToList().FindIndex(x => x.Tag as string == ExitNode);
+        NoExitNodesMessage.IsOpen = peers.Count == 0;
     }
 
     public Settings()

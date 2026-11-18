@@ -8,7 +8,7 @@
         <ResourceDictionary>
             <ResourceDictionary.MergedDictionaries>
                 <XamlControlsResources xmlns="using:Microsoft.UI.Xaml.Controls" />
-                <!-- Other merged dictionaries here -->
+                <ResourceDictionary Source="Assets/CopyButton.xaml" />
             </ResourceDictionary.MergedDictionaries>
             <Style x:Key="PageContentStyle" TargetType="StackPanel">
                 <Setter Property="Padding" Value="24,20,24,32" />

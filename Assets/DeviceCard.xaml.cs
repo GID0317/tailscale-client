@@ -1,14 +1,15 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
-using System.Threading.Tasks;
-using Microsoft.UI.Input;
+using System.Linq;
 using Microsoft.UI.Xaml;
 using Microsoft.UI.Xaml.Controls;
-using Microsoft.UI.Xaml.Controls.Primitives;
 using Microsoft.UI.Xaml.Media;
 using Windows.ApplicationModel.DataTransfer;
+using Windows.Foundation;
 
 namespace TailscaleClient.Assets;
+
+public sealed record DeviceDetail(string Label, string Value);
 
 public sealed partial class DeviceCard : UserControl
 {
@@ -42,88 +43,59 @@ public sealed partial class DeviceCard : UserControl
         };
     }
 
-    private readonly string Hostname = "";
-    private readonly string IPv4 = "";
-    private readonly string IPv6 = "";
-    private readonly string TailnetDNS = "";
-    private readonly string StatusText = "Online";
-    private readonly string OSIcon = "ms-appx:///Assets/Platforms/Unknown.png";
-    private readonly SolidColorBrush StatusColor = GetStatusColor(true);
-
-    public readonly string OwnedBy = "-1";
-    public readonly string OwnedByString = "Owned by Unknown";
-    public readonly string ProfilePicture = "ms-appx:///Assets/Misc/Guest.png";
-    public readonly bool IsOwnedByCurrentUser = true;
-
-    public DeviceCard()
+    public string DeviceKey { get; }
+    public string Hostname { get; }
+    public bool IsOwnedByCurrentUser { get; }
+    public bool IsExpanded
     {
-        InitializeComponent();
-
-        IPv4 = "Unavailable";
-        IPv6 = "Unavailable";
-        TailnetDNS = "Unavailable";
-        Hostname = "Disconnected from this Tailnet";
-
-        StatusText = "Disconnected";
-        StatusColor = GetStatusColor(false);
-        OSIcon = "ms-appx:///Assets/Platforms/Unknown.png";
+        get => DeviceDetails.IsExpanded;
+        set => DeviceDetails.IsExpanded = value;
     }
 
-    public void Hide() => Visibility = Microsoft.UI.Xaml.Visibility.Collapsed;
-    public void Show() => Visibility = Microsoft.UI.Xaml.Visibility.Visible;
+    private readonly string _systemHostname;
+    private readonly string IPv4;
+    private readonly string IPv6;
+    private readonly string TailnetDNS;
+    private readonly string Summary;
+    private readonly List<DeviceDetail> Details;
+    private readonly IconElement PlatformIcon;
+    private readonly SolidColorBrush StatusColor;
 
-    public DeviceCard(Core.Types.PeerInfo device, Dictionary<string, Core.Types.User> user, string currentUserId)
+    public DeviceCard(string deviceKey, Core.Types.PeerInfo device, Dictionary<string, Core.Types.User> users, long currentUserId)
     {
-        InitializeComponent();
+        DeviceKey = deviceKey;
+        IsOwnedByCurrentUser = device.UserID == currentUserId;
+        _systemHostname = device.HostName;
+        TailnetDNS = device.DNSName?.TrimEnd('.') ?? "";
+        var nickname = TailnetDNS.Split('.')[0];
+        Hostname = nickname.Length > 0 ? nickname : device.HostName ?? "Unknown device";
 
-        OwnedBy = device.UserID.ToString();
-        OwnedByString = "Owned by " + user[OwnedBy].DisplayName;
-        IsOwnedByCurrentUser = currentUserId != OwnedBy;
-
-        var ownerPfp = user[OwnedBy].ProfilePicURL;
-
-        if (Uri.TryCreate(ownerPfp, UriKind.Absolute, out _))
-        {
-            ProfilePicture = ownerPfp;
-        }
-
-        var dnsName = device.DNSName;
-        var nickname = dnsName.Split(".")[0];
-        if (nickname == "")
-        {
-            nickname = device.HostName;
-        }
-
-        if (device.TailscaleIPs != null)
-        {
-            var ipv4Index = 0;
-            if (device.TailscaleIPs[0].Contains(':'))
-            {
-                ipv4Index = 1;
-            }
-
-            IPv4 = device.TailscaleIPs[ipv4Index];
-            IPv6 = device.TailscaleIPs[1 - ipv4Index];
-        }
-        else
-        {
-            IPv4 = "Unavailable";
-            IPv6 = "Unavailable";
-        }
-
-        TailnetDNS = dnsName.TrimEnd('.');
-        if (TailnetDNS == "")
-        {
-            TailnetDNS = "Not connected to Tailscale.";
-        }
-        Hostname = nickname == device.HostName ? nickname : $"{nickname} ({device.HostName})";
-
-        StatusText = device.Online ? "Online" : "Last seen " + device.LastSeen.ToLocalTime().ToString();
-        if (device.LastSeen.Year < 2010 && !device.Online)  // Good enough to check if 1970
-        {
-            StatusText = "Action required";
-        }
+        var addresses = device.TailscaleIPs ?? [];
+        IPv4 = addresses.FirstOrDefault(address => !string.IsNullOrEmpty(address) && !address.Contains(':'));
+        IPv6 = addresses.FirstOrDefault(address => address?.Contains(':') == true);
+        var status = device.Online ? "Online" : device.LastSeen.Year >= 2010 ? "Offline" : "Action required";
+        var primaryAddress = IPv4 ?? IPv6;
+        Summary = primaryAddress == null ? status : $"{status} - {primaryAddress}";
         StatusColor = GetStatusColor(device.Online);
+
+        Details =
+        [
+            new("Device name", Hostname),
+            new("IPv4", IPv4 ?? "Unavailable"),
+            new("IPv6", IPv6 ?? "Unavailable"),
+            new("DNS name", TailnetDNS.Length == 0 ? "Unavailable" : TailnetDNS),
+            new("Status", status)
+        ];
+        if (!string.IsNullOrEmpty(_systemHostname) && !string.Equals(Hostname, _systemHostname, StringComparison.OrdinalIgnoreCase))
+            Details.Add(new("Host name", _systemHostname));
+        if (users != null && users.TryGetValue(device.UserID.ToString(), out var owner))
+        {
+            var ownerName = string.IsNullOrWhiteSpace(owner.DisplayName) ? owner.LoginName : owner.DisplayName;
+            if (!string.IsNullOrWhiteSpace(ownerName))
+                Details.Add(new("Owner", ownerName));
+        }
+        if (!device.Online && device.LastSeen.Year >= 2010)
+            Details.Add(new("Last seen", device.LastSeen.ToLocalTime().ToString("g")));
 
         var deviceType = device.OS switch
         {
@@ -134,7 +106,30 @@ public sealed partial class DeviceCard : UserControl
             "android" => "Android",
             _ => "Unknown",
         };
-        OSIcon = "ms-appx:///Assets/Platforms/" + deviceType + ".png";
+        PlatformIcon = deviceType == "Windows"
+            ? new PathIcon
+            {
+                Width = 20,
+                Height = 20,
+                Data = new GeometryGroup
+                {
+                    Children =
+                    {
+                        new RectangleGeometry { Rect = new Rect(0, 0, 9, 9) },
+                        new RectangleGeometry { Rect = new Rect(11, 0, 9, 9) },
+                        new RectangleGeometry { Rect = new Rect(0, 11, 9, 9) },
+                        new RectangleGeometry { Rect = new Rect(11, 11, 9, 9) }
+                    }
+                }
+            }
+            : new BitmapIcon
+            {
+                Width = 20,
+                Height = 20,
+                UriSource = new Uri($"ms-appx:///Assets/Platforms/{deviceType}.png")
+            };
+
+        InitializeComponent();
 
         if (device.KeyExpiry == DateTime.MinValue)
         {
@@ -179,48 +174,26 @@ public sealed partial class DeviceCard : UserControl
                                                    "This device is advertising an exit node.",
                                                    Windows.UI.Color.FromArgb(255, 0, 200, 255)));
         }
+
+        if (TagSection.Children.Count > 0)
+            TagSection.Visibility = Visibility.Visible;
     }
 
-    private void CopyToClipboard(object sender, Microsoft.UI.Xaml.Input.PointerRoutedEventArgs e)
+    internal bool Matches(string query)
     {
-        CopyText(((TextBlock)sender).Text, (FrameworkElement)sender);
+        return query.Length == 0 ||
+            Hostname.Contains(query, StringComparison.OrdinalIgnoreCase) ||
+            _systemHostname?.Contains(query, StringComparison.OrdinalIgnoreCase) == true ||
+            TailnetDNS.Contains(query, StringComparison.OrdinalIgnoreCase) ||
+            IPv4?.Contains(query, StringComparison.OrdinalIgnoreCase) == true ||
+            IPv6?.Contains(query, StringComparison.OrdinalIgnoreCase) == true;
     }
 
-    private void CopyAddress(object sender, RoutedEventArgs e)
+    private void CopyDetails(object sender, RoutedEventArgs e)
     {
-        CopyText((string)((Button)sender).Tag, (FrameworkElement)sender);
-    }
-
-    private void CopyText(string text, FrameworkElement anchor)
-    {
+        var text = string.Join(Environment.NewLine, Details.Select(detail => $"{detail.Label}: {detail.Value}"));
         var dataPackage = new DataPackage();
         dataPackage.SetText(text);
         Clipboard.SetContent(dataPackage);
-
-        var flyout = new Flyout
-        {
-            Content =
-              new TextBlock
-              {
-                  Text = "Copied to clipboard",
-                  FontSize = 14,
-              },
-            Placement = FlyoutPlacementMode.Bottom,
-        };
-
-        flyout.ShowAt(anchor);
-
-        Task.Delay(1500).ContinueWith(
-            _ => DispatcherQueue.TryEnqueue(delegate () { flyout.Hide(); }));
-    }
-
-    private void HoverStart(object sender, Microsoft.UI.Xaml.Input.PointerRoutedEventArgs e)
-    {
-        ProtectedCursor = InputSystemCursor.Create(InputSystemCursorShape.Hand);
-    }
-
-    private void HoverEnd(object sender, Microsoft.UI.Xaml.Input.PointerRoutedEventArgs e)
-    {
-        ProtectedCursor = InputSystemCursor.Create(InputSystemCursorShape.Arrow);
     }
 }

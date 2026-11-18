@@ -10,11 +10,11 @@
                 <TextBlock Text="Settings" Style="{StaticResource TitleTextBlockStyle}" />
                 <StackPanel Spacing="8">
                     <TextBlock Text="Appearance" Style="{StaticResource BodyStrongTextBlockStyle}" />
-                    <controls:SettingsCard Header="App theme">
+                    <controls:SettingsCard Header="App theme" Description="Select which app theme to display">
                         <controls:SettingsCard.HeaderIcon><FontIcon Glyph="&#xE790;" /></controls:SettingsCard.HeaderIcon>
                         <ComboBox x:Name="ThemeSelector" MinWidth="140" SelectedValuePath="Tag"
                             SelectionChanged="ThemeChanged" AutomationProperties.Name="App theme">
-                            <ComboBoxItem Content="System" Tag="Default" />
+                            <ComboBoxItem Content="Uses system setting" Tag="Default" />
                             <ComboBoxItem Content="Light" Tag="Light" />
                             <ComboBoxItem Content="Dark" Tag="Dark" />
                         </ComboBox>
@@ -24,15 +24,21 @@
                 </StackPanel>
                 <StackPanel Spacing="8">
                     <TextBlock Text="Routing" Style="{StaticResource BodyStrongTextBlockStyle}" />
-                    <controls:SettingsCard Header="Exit node"
-                        Description="Route internet traffic through another device in your tailnet. Choose None to use your usual connection.">
+                    <controls:SettingsCard Header="Exit node">
+                        <controls:SettingsCard.Description>
+                            <TextBlock TextWrapping="Wrap">
+                                <Run Text="Route internet traffic through another device in your tailnet. Choose None to use your usual connection. " />
+                                <Hyperlink NavigateUri="https://tailscale.com/kb/1103/exit-nodes">About exit nodes</Hyperlink>
+                            </TextBlock>
+                        </controls:SettingsCard.Description>
                         <controls:SettingsCard.HeaderIcon><FontIcon Glyph="&#xE774;" /></controls:SettingsCard.HeaderIcon>
                         <ComboBox x:Name="ExitNodeList" Width="220" PlaceholderText="Select an exit node"
                             SelectedIndex="{x:Bind CurrentNode, Mode=OneWay}" SelectionChanged="ExitNodeChanged"
                             AutomationProperties.Name="Exit node" />
                     </controls:SettingsCard>
-                    <HyperlinkButton Content="About exit nodes" Padding="0" HorizontalAlignment="Left"
-                        NavigateUri="https://tailscale.com/kb/1103/exit-nodes" />
+                    <InfoBar x:Name="NoExitNodesMessage" IsClosable="False" Severity="Informational"
+                        Title="No exit nodes available"
+                        Message="Set up an exit node in your tailnet to use this feature." />
                 </StackPanel>
                 <StackPanel Spacing="8">
                     <TextBlock Text="Network preferences" Style="{StaticResource BodyStrongTextBlockStyle}" />
@@ -57,33 +63,50 @@
                             IsOn="{x:Bind SubnetRoutesEnabled, Mode=TwoWay}" Toggled="UpdatePrefsRoutes"
                             AutomationProperties.Name="Accept subnet routes" />
                     </controls:SettingsCard>
+                    <controls:SettingsExpander x:Name="AdvancedSettingsExpander" Header="Advanced settings"
+                        Description="Share this device's internet connection.">
+                        <controls:SettingsExpander.HeaderIcon><FontIcon Glyph="&#xE713;" /></controls:SettingsExpander.HeaderIcon>
+                        <controls:SettingsExpander.Items>
+                            <controls:SettingsCard Header="Advertise as an exit node"
+                                Description="Offer this device as an exit node so other devices can route internet traffic through it.">
+                                <ToggleSwitch x:Name="AdvertiseExitNodeSwitch" MinWidth="0"
+                                    IsOn="{x:Bind AdvertiseExitNodeEnabled, Mode=OneWay}" Toggled="UpdatePrefsAdvertiseExitNode"
+                                    AutomationProperties.Name="Advertise as an exit node" />
+                            </controls:SettingsCard>
+                        </controls:SettingsExpander.Items>
+                    </controls:SettingsExpander>
+                    <controls:SettingsExpander x:Name="AboutExpander" Header="About" Description="Tailscale Client">
+                        <controls:SettingsExpander.Resources>
+                            <x:Double x:Key="SettingsCardWrapThreshold">280</x:Double>
+                            <x:Double x:Key="SettingsCardWrapNoIconThreshold">220</x:Double>
+                        </controls:SettingsExpander.Resources>
+                        <controls:SettingsExpander.HeaderIcon>
+                            <BitmapIcon UriSource="ms-appx:///Assets/Icons/AppIconBase-Dark.png"
+                                Width="24" Height="24" ShowAsMonochrome="False" />
+                        </controls:SettingsExpander.HeaderIcon>
+                        <TextBlock x:Name="AboutVersion" Text="{x:Bind VersionText, Mode=OneTime}"
+                            Style="{StaticResource CaptionTextBlockStyle}" Foreground="{ThemeResource TextFillColorSecondaryBrush}"
+                            TextTrimming="CharacterEllipsis" MaxWidth="180" ToolTipService.ToolTip="{x:Bind VersionText, Mode=OneTime}" />
+                        <controls:SettingsExpander.Items>
+                            <controls:SettingsCard Header="Dependencies" ContentAlignment="Vertical" HorizontalContentAlignment="Stretch">
+                                <StackPanel>
+                                    <HyperlinkButton Content="Windows App SDK" NavigateUri="https://github.com/microsoft/WindowsAppSDK" />
+                                    <HyperlinkButton Content="CommunityToolkit.Mvvm" NavigateUri="https://github.com/CommunityToolkit/dotnet" />
+                                    <HyperlinkButton Content="Windows Community Toolkit Settings Controls"
+                                        NavigateUri="https://www.nuget.org/packages/CommunityToolkit.WinUI.Controls.SettingsControls" />
+                                    <HyperlinkButton Content="H.NotifyIcon.WinUI" NavigateUri="https://github.com/HavenDV/H.NotifyIcon" />
+                                    <HyperlinkButton Content="Nerdbank.GitVersioning" NavigateUri="https://github.com/dotnet/Nerdbank.GitVersioning" />
+                                    <HyperlinkButton Content="QRCoder" NavigateUri="https://github.com/codebude/QRCoder" />
+                                    <HyperlinkButton Content="Velopack" NavigateUri="https://github.com/velopack/velopack" />
+                                    <HyperlinkButton Content="WinUIEx" NavigateUri="https://dotmorten.github.io/WinUIEx" />
+                                </StackPanel>
+                            </controls:SettingsCard>
+                            <controls:SettingsCard Header="License">
+                                <HyperlinkButton Content="MIT License" NavigateUri="https://github.com/uwu/tailscale-client/blob/main/LICENSE.txt" />
+                            </controls:SettingsCard>
+                        </controls:SettingsExpander.Items>
+                    </controls:SettingsExpander>
                 </StackPanel>
-                <controls:SettingsExpander x:Name="AdvancedSettingsExpander" Header="Advanced settings"
-                    Description="Share this device's internet connection.">
-                    <controls:SettingsExpander.HeaderIcon><FontIcon Glyph="&#xE713;" /></controls:SettingsExpander.HeaderIcon>
-                    <controls:SettingsExpander.Items>
-                        <controls:SettingsCard Header="Advertise as an exit node"
-                            Description="Offer this device as an exit node so other devices can route internet traffic through it.">
-                            <ToggleSwitch x:Name="AdvertiseExitNodeSwitch" MinWidth="0"
-                                IsOn="{x:Bind AdvertiseExitNodeEnabled, Mode=OneWay}" Toggled="UpdatePrefsAdvertiseExitNode"
-                                AutomationProperties.Name="Advertise as an exit node" />
-                        </controls:SettingsCard>
-                    </controls:SettingsExpander.Items>
-                </controls:SettingsExpander>
-                <controls:SettingsExpander x:Name="AboutExpander" Header="About" Description="Tailscale Client">
-                    <controls:SettingsExpander.HeaderIcon><FontIcon Glyph="&#xE946;" /></controls:SettingsExpander.HeaderIcon>
-                    <controls:SettingsExpander.Items>
-                        <controls:SettingsCard Header="Version">
-                            <TextBlock Text="{x:Bind VersionText, Mode=OneTime}" TextWrapping="Wrap" />
-                        </controls:SettingsCard>
-                        <controls:SettingsCard Header="Original project" Description="Created by xirreal">
-                            <HyperlinkButton Content="GitHub" NavigateUri="https://github.com/uwu/tailscale-client" />
-                        </controls:SettingsCard>
-                        <controls:SettingsCard Header="License">
-                            <HyperlinkButton Content="MIT License" NavigateUri="https://github.com/uwu/tailscale-client/blob/main/LICENSE.txt" />
-                        </controls:SettingsCard>
-                    </controls:SettingsExpander.Items>
-                </controls:SettingsExpander>
             </StackPanel>
         </Grid>
     </ScrollViewer>

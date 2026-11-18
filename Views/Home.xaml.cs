@@ -1,141 +1,111 @@
 using System;
-using System.ComponentModel;
-using System.Runtime.CompilerServices;
+using System.Linq;
 using Microsoft.UI.Xaml;
 using Microsoft.UI.Xaml.Controls;
+using TailscaleClient.Assets;
 using TailscaleClient.Core;
 
 namespace TailscaleClient.Views;
 
-public sealed partial class Home : Page, INotifyPropertyChanged
+public sealed partial class Home : Page
 {
-    private Core.Types.Status _status = null;
-    private Core.Types.Profile _profile = null;
-
-    public event PropertyChangedEventHandler PropertyChanged;
-    public void OnPropertyChanged([CallerMemberName] string propertyName = null)
-    {
-        PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(propertyName));
-    }
-
-    private string _username = "Guest";
-    public string UserName
-    {
-        get => _username;
-        set
-        {
-            _username = value;
-            OnPropertyChanged();
-        }
-    }
-
-    private string _profilePicture = "ms-appx:///Assets/Misc/Guest.png";
-    public string ProfilePicture
-    {
-        get => _profilePicture;
-        set
-        {
-            _profilePicture = value;
-            OnPropertyChanged();
-        }
-    }
-
-    private string _amIConnected = "Connected as";
-    public string AmIConnected
-    {
-        get => _amIConnected;
-        set
-        {
-            _amIConnected = value;
-            OnPropertyChanged();
-        }
-    }
-
-    private string UserID = "";
-
-    private void UpdateUI()
-    {
-        _status = API.GetStatus();
-        _profile = API.GetCurrentUser();
-
-        MyDevice.Children.Clear();
-        OtherDevices.Children.Clear();
-
-        UserID = _status.Self.UserID.ToString();
-        UserName = _profile.UserProfile.DisplayName;
-        var pfp = _profile.UserProfile.ProfilePicURL;
-
-        if (Uri.TryCreate(pfp, UriKind.Absolute, out _))
-        {
-            ProfilePicture = pfp;
-        }
-
-        if (_status.BackendState != "Running")
-        {
-            AmIConnected = _status.BackendState switch
-            {
-                "Starting" => "Attempting to connect as",
-                "NeedsLogin" => "Login required",
-                _ => "Disconnected, logged in as"
-            };
-
-            MyDevice.Children.Add(new Assets.DeviceCard());
-            FilterDevices(OwnedDevicesFilter.IsChecked != true);
-            return;
-        }
-
-        AmIConnected = "Connected as";
-
-        MyDevice.Children.Add(new Assets.DeviceCard(_status.Self, _status.User, UserID));
-
-        foreach ((_, var device) in _status?.Peer ?? [])
-        {
-            OtherDevices.Children.Add(new Assets.DeviceCard(device, _status.User, UserID));
-        }
-        FilterDevices(OwnedDevicesFilter.IsChecked != true);
-    }
-
     public Home()
     {
         InitializeComponent();
+        Loaded += OnLoaded;
+        Unloaded += OnUnloaded;
+    }
 
-        Messaging.Instance.MessageReceived += (sender, e) =>
-        {
-            if (e.Kind == Messaging.MessageKind.IPNBusUpdate && (e.Key == "NetMap" || e.Key == "State"))
-            {
-                DispatcherQueue.TryEnqueue(() => { UpdateUI(); });
-            }
-            else if (e.Kind == Messaging.MessageKind.ProfileSwitch)
-            {
-                DispatcherQueue.TryEnqueue(() => { UpdateUI(); });
-            }
-        };
-
+    private void OnLoaded(object sender, RoutedEventArgs e)
+    {
+        Messaging.Instance.MessageReceived += OnDaemonMessage;
         UpdateUI();
     }
 
-    private void FilterDevices(bool show)
+    private void OnUnloaded(object sender, RoutedEventArgs e)
     {
-        var visibleDevices = 0;
-        foreach (var child in OtherDevices.Children)
-        {
-            if (child is Assets.DeviceCard device && device.OwnedBy != UserID)
-            {
-                if (show)
-                {
-                    device.Show();
-                }
-                else
-                {
-                    device.Hide();
-                }
-            }
-            if (child.Visibility == Visibility.Visible)
-                visibleDevices++;
-        }
-        NoDevicesMessage.Visibility = visibleDevices == 0 ? Visibility.Visible : Visibility.Collapsed;
+        Messaging.Instance.MessageReceived -= OnDaemonMessage;
     }
 
-    private void Hide(object s, RoutedEventArgs e) => FilterDevices(false);
-    private void Show(object s, RoutedEventArgs e) => FilterDevices(true);
+    private void OnDaemonMessage(object sender, Messaging.CoreMessagingEvent e)
+    {
+        if (e.Kind == Messaging.MessageKind.ProfileSwitch ||
+            (e.Kind == Messaging.MessageKind.IPNBusUpdate && (e.Key == "NetMap" || e.Key == "State")))
+        {
+            DispatcherQueue.TryEnqueue(() =>
+            {
+                if (IsLoaded)
+                    UpdateUI();
+            });
+        }
+    }
+
+    private void UpdateUI()
+    {
+        var status = API.GetStatus();
+        var self = status.Self;
+        var isConnected = status.BackendState == "Running" && self != null;
+
+        var previousSelf = MyDevice.Children.OfType<DeviceCard>().FirstOrDefault();
+        var collapsedPeers = OtherDevices.Children.OfType<DeviceCard>()
+            .Where(card => !card.IsExpanded).Select(card => card.DeviceKey).ToHashSet();
+
+        MyDevice.Children.Clear();
+        OtherDevices.Children.Clear();
+        ConnectionNotice.IsOpen = !isConnected;
+        PeerSection.Visibility = isConnected ? Visibility.Visible : Visibility.Collapsed;
+
+        if (!isConnected)
+        {
+            (ConnectionNotice.Title, ConnectionNotice.Message) = status.BackendState switch
+            {
+                "Starting" => ("Connecting to Tailscale", "Devices will appear once the connection is ready."),
+                "NeedsLogin" => ("Sign in to see your devices", "Open Accounts to sign in to Tailscale."),
+                _ => ("Tailscale is disconnected", "Open Accounts to connect this device.")
+            };
+            return;
+        }
+
+        MyDevice.Children.Add(new DeviceCard(self.ID, self, status.User, self.UserID)
+        {
+            IsExpanded = previousSelf?.DeviceKey != self.ID || previousSelf?.IsExpanded != false
+        });
+
+        var cards = (status.Peer ?? [])
+            .Select(peer => new DeviceCard(peer.Key, peer.Value, status.User, self.UserID))
+            .OrderBy(card => card.Hostname, StringComparer.CurrentCultureIgnoreCase);
+        foreach (var card in cards)
+        {
+            card.IsExpanded = !collapsedPeers.Contains(card.DeviceKey);
+            OtherDevices.Children.Add(card);
+        }
+
+        ApplyDeviceFilter();
+    }
+
+    private void ApplyDeviceFilter()
+    {
+        if (OtherDevices == null || NoDevicesMessage == null)
+            return;
+
+        var query = DeviceSearch.Text.Trim();
+        var onlyOwned = OwnedDevicesFilter.IsChecked == true;
+        var visibleCount = 0;
+        foreach (var card in OtherDevices.Children.OfType<DeviceCard>())
+        {
+            var visible = (!onlyOwned || card.IsOwnedByCurrentUser) && card.Matches(query);
+            card.Visibility = visible ? Visibility.Visible : Visibility.Collapsed;
+            if (visible)
+                visibleCount++;
+        }
+
+        NoDevicesMessage.Text = query.Length > 0 ? "No devices match your search."
+            : onlyOwned ? "You don't own any other devices on this tailnet."
+            : "There are no other devices on this tailnet.";
+        NoDevicesMessage.Visibility = visibleCount == 0 ? Visibility.Visible : Visibility.Collapsed;
+    }
+
+    private void SearchChanged(object sender, TextChangedEventArgs e) => ApplyDeviceFilter();
+
+    private void OwnershipChanged(object sender, RoutedEventArgs e) => ApplyDeviceFilter();
 }

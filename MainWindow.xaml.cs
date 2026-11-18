@@ -1,13 +1,17 @@
 using Microsoft.UI;
 using Microsoft.UI.Windowing;
 using Microsoft.UI.Xaml;
+using Microsoft.Win32;
 using Windows.UI.ViewManagement;
 using WinUIEx;
+using WinUIEx.Messaging;
 
 namespace TailscaleClient;
 
 public sealed partial class MainWindow : WindowEx
 {
+    private readonly WindowMessageMonitor _systemThemeMonitor;
+
     public MainWindow() : this(null) { }
 
     internal MainWindow(FrameworkElement content)
@@ -19,6 +23,9 @@ public sealed partial class MainWindow : WindowEx
             Content = content;
 
         ExtendsContentIntoTitleBar = true;
+        _systemThemeMonitor = new WindowMessageMonitor(this);
+        _systemThemeMonitor.WindowMessageReceived += SystemThemeMessageReceived;
+        UpdateTaskbarIcon();
         if (Content is FrameworkElement root)
         {
             root.ActualThemeChanged += Content_ActualThemeChanged;
@@ -41,16 +48,22 @@ public sealed partial class MainWindow : WindowEx
 
     private void Content_ActualThemeChanged(FrameworkElement sender, object args)
     {
-        if (sender.ActualTheme == ElementTheme.Light)
-        {
-            AppWindow.SetIcon(Constants.AppIconLightAbsolutePath);
-        }
-        else
-        {
-            AppWindow.SetIcon(Constants.AppIconDarkAbsolutePath);
-        }
-
         UpdateCaptionColors(sender);
+    }
+
+    private void SystemThemeMessageReceived(object sender, WindowMessageEventArgs args)
+    {
+        // WM_SETTINGCHANGE and WM_THEMECHANGED also reach windows hidden in the tray.
+        if (args.Message.MessageId is 0x001A or 0x031A)
+            UpdateTaskbarIcon();
+    }
+
+    private void UpdateTaskbarIcon()
+    {
+        using var personalize = Registry.CurrentUser.OpenSubKey(
+            @"Software\Microsoft\Windows\CurrentVersion\Themes\Personalize");
+        var usesLightTheme = personalize?.GetValue("SystemUsesLightTheme") is int value && value != 0;
+        AppWindow.SetIcon(usesLightTheme ? Constants.AppIconDarkAbsolutePath : Constants.AppIconLightAbsolutePath);
     }
 
     private void UpdateCaptionColors(FrameworkElement root)
@@ -76,6 +89,7 @@ public sealed partial class MainWindow : WindowEx
         Core.WindowPersistence.Save();
         if (App.CanCloseWindow)
         {
+            _systemThemeMonitor.Dispose();
             App.Exit();
         }
         else
