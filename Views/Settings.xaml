@@ -21,6 +21,16 @@
                     </controls:SettingsCard>
                     <InfoBar x:Name="ThemeSaveWarning" Severity="Warning"
                         Title="Theme could not be saved" Message="The selected theme applies until you close the app." />
+                    <controls:SettingsCard Header="Navigation style" Description="Choose where navigation appears.">
+                        <controls:SettingsCard.HeaderIcon><SymbolIcon Symbol="List" /></controls:SettingsCard.HeaderIcon>
+                        <ComboBox x:Name="NavigationStyleSelector" MinWidth="140" SelectedValuePath="Tag"
+                            SelectionChanged="NavigationStyleChanged" AutomationProperties.Name="Navigation style">
+                            <ComboBoxItem Content="Left" Tag="Left" />
+                            <ComboBoxItem Content="Top" Tag="Top" />
+                        </ComboBox>
+                    </controls:SettingsCard>
+                    <InfoBar x:Name="NavigationSaveWarning" Severity="Warning"
+                        Title="Navigation style could not be saved" Message="The selected layout applies until you close the app." />
                 </StackPanel>
                 <StackPanel Spacing="8">
                     <TextBlock Text="Routing" Style="{StaticResource BodyStrongTextBlockStyle}" />
@@ -75,14 +85,13 @@
                             </controls:SettingsCard>
                         </controls:SettingsExpander.Items>
                     </controls:SettingsExpander>
-                    <controls:SettingsExpander x:Name="AboutExpander" Header="About" Description="Tailscale Client">
+                    <controls:SettingsExpander x:Name="AboutExpander" Header="Tailscale Client" Description="Licensed under the MIT License">
                         <controls:SettingsExpander.Resources>
                             <x:Double x:Key="SettingsCardWrapThreshold">280</x:Double>
                             <x:Double x:Key="SettingsCardWrapNoIconThreshold">220</x:Double>
                         </controls:SettingsExpander.Resources>
                         <controls:SettingsExpander.HeaderIcon>
-                            <BitmapIcon UriSource="ms-appx:///Assets/Icons/AppIconBase-Dark.png"
-                                Width="24" Height="24" ShowAsMonochrome="False" />
+                            <ImageIcon Source="{ThemeResource AppIconImage}" Width="24" Height="24" />
                         </controls:SettingsExpander.HeaderIcon>
                         <TextBlock x:Name="AboutVersion" Text="{x:Bind VersionText, Mode=OneTime}"
                             Style="{StaticResource CaptionTextBlockStyle}" Foreground="{ThemeResource TextFillColorSecondaryBrush}"

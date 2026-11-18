@@ -6,6 +6,16 @@
     xmlns:local="using:TailscaleClient">
     <Application.Resources>
         <ResourceDictionary>
+            <ResourceDictionary.ThemeDictionaries>
+                <ResourceDictionary x:Key="Default">
+                    <BitmapImage x:Key="AppIconImage" UriSource="ms-appx:///Assets/Icons/AppIconBase-Light.png" />
+                    <ImageIconSource x:Key="AppTitleBarIcon" ImageSource="{StaticResource AppIconImage}" />
+                </ResourceDictionary>
+                <ResourceDictionary x:Key="Light">
+                    <BitmapImage x:Key="AppIconImage" UriSource="ms-appx:///Assets/Icons/AppIconBase-Dark.png" />
+                    <ImageIconSource x:Key="AppTitleBarIcon" ImageSource="{StaticResource AppIconImage}" />
+                </ResourceDictionary>
+            </ResourceDictionary.ThemeDictionaries>
             <ResourceDictionary.MergedDictionaries>
                 <XamlControlsResources xmlns="using:Microsoft.UI.Xaml.Controls" />
                 <ResourceDictionary Source="Assets/CopyButton.xaml" />

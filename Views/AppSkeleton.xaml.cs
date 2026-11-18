@@ -3,11 +3,16 @@ using System.ComponentModel;
 using System.Runtime.CompilerServices;
 using Microsoft.UI.Xaml;
 using Microsoft.UI.Xaml.Controls;
+using Microsoft.UI.Xaml.Navigation;
+using TailscaleClient.Core;
 
 namespace TailscaleClient.Views;
 
 public sealed partial class AppSkeleton : Page, INotifyPropertyChanged
 {
+    private bool _synchronizingNavigation;
+    internal bool UsesTopNavigation => NavigationViewControl.PaneDisplayMode == NavigationViewPaneDisplayMode.Top;
+
     public event PropertyChangedEventHandler PropertyChanged;
     public void OnPropertyChanged([CallerMemberName] string propertyName = null)
     {
@@ -28,6 +33,7 @@ public sealed partial class AppSkeleton : Page, INotifyPropertyChanged
     public AppSkeleton()
     {
         InitializeComponent();
+        ApplyNavigationStyle(ThemePreference.LoadTopNavigation());
 
         var status = Core.API.GetStatus();
         if (status.BackendState == "NeedsLogin")
@@ -60,8 +66,46 @@ public sealed partial class AppSkeleton : Page, INotifyPropertyChanged
             NavigationViewControl.IsPaneOpen = !NavigationViewControl.IsPaneOpen;
     }
 
+    internal void ApplyNavigationStyle(bool useTop)
+    {
+        NavigationViewControl.PaneDisplayMode = useTop
+            ? NavigationViewPaneDisplayMode.Top : NavigationViewPaneDisplayMode.Auto;
+        AppTitleBar.IsPaneToggleButtonVisible = !useTop;
+    }
+
+    private void OnBackRequested(TitleBar sender, object args)
+    {
+        if (NavigationViewControl.IsEnabled && ContentFrame.CanGoBack)
+            ContentFrame.GoBack();
+    }
+
+    private void OnFrameNavigated(object sender, NavigationEventArgs args)
+    {
+        _synchronizingNavigation = true;
+        try
+        {
+            NavigationViewControl.SelectedItem = args.SourcePageType == typeof(Settings)
+                ? NavigationViewControl.SettingsItem
+                : NavigationViewControl.MenuItems[args.SourcePageType == typeof(Accounts) ? 1 : 0];
+        }
+        finally
+        {
+            _synchronizingNavigation = false;
+        }
+        UpdateBackButton();
+    }
+
+    private void UpdateBackButton()
+    {
+        AppTitleBar.IsBackButtonVisible = ContentFrame.CanGoBack;
+        AppTitleBar.IsBackButtonEnabled = ContentFrame.CanGoBack && NavigationViewControl.IsEnabled;
+    }
+
     private void OnNavigate(NavigationView sender, NavigationViewSelectionChangedEventArgs args)
     {
+        if (_synchronizingNavigation)
+            return;
+
         var page = args.IsSettingsSelected ? typeof(Settings) : (args.SelectedItem as NavigationViewItem)?.Tag switch
         {
             "Home" => typeof(Home),
@@ -82,6 +126,7 @@ public sealed partial class AppSkeleton : Page, INotifyPropertyChanged
     {
         NavigationViewControl.IsEnabled = false;
         ContentFrame.IsEnabled = false;
+        UpdateBackButton();
 
         LoadingMessage = message;
 
@@ -92,6 +137,7 @@ public sealed partial class AppSkeleton : Page, INotifyPropertyChanged
     {
         NavigationViewControl.IsEnabled = true;
         ContentFrame.IsEnabled = true;
+        UpdateBackButton();
 
         LoadingBackground.Visibility = Microsoft.UI.Xaml.Visibility.Collapsed;
     }

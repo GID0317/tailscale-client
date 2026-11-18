@@ -133,6 +133,8 @@ public sealed partial class Settings : Page, INotifyPropertyChanged
         InitializeComponent();
         ThemeSelector.SelectedValue = (App.MainWindow?.Content as FrameworkElement)?.RequestedTheme.ToString()
             ?? nameof(ElementTheme.Default);
+        NavigationStyleSelector.SelectedValue = (App.MainWindow?.Content as AppSkeleton)?.UsesTopNavigation == true
+            ? "Top" : "Left";
 
         Messaging.Instance.MessageReceived += (sender, e) =>
         {
@@ -159,6 +161,17 @@ public sealed partial class Settings : Page, INotifyPropertyChanged
 
         App.MainWindow.ApplyTheme(theme);
         ThemeSaveWarning.IsOpen = !ThemePreference.TrySave(theme);
+    }
+
+    private void NavigationStyleChanged(object sender, SelectionChangedEventArgs e)
+    {
+        if (NavigationStyleSelector?.SelectedValue is not string style ||
+            App.MainWindow?.Content is not AppSkeleton shell || shell.UsesTopNavigation == (style == "Top"))
+            return;
+
+        var useTop = style == "Top";
+        shell.ApplyNavigationStyle(useTop);
+        NavigationSaveWarning.IsOpen = !ThemePreference.TrySaveNavigationStyle(useTop);
     }
 
     private void UpdatePrefsShields(object _sender, RoutedEventArgs e)

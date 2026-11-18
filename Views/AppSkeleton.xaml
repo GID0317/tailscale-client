@@ -6,11 +6,8 @@
     <Grid>
         <Grid.RowDefinitions><RowDefinition Height="Auto" /><RowDefinition Height="*" /></Grid.RowDefinitions>
         <TitleBar x:Name="AppTitleBar" Title="Tailscale Client" IsPaneToggleButtonVisible="True"
-            PaneToggleRequested="OnPaneToggleRequested">
-            <TitleBar.IconSource>
-                <ImageIconSource ImageSource="ms-appx:///Assets/Icons/AppIconBase-Dark.png" />
-            </TitleBar.IconSource>
-        </TitleBar>
+            PaneToggleRequested="OnPaneToggleRequested" BackRequested="OnBackRequested"
+            IconSource="{ThemeResource AppTitleBarIcon}" />
         <NavigationView x:Name="NavigationViewControl" Grid.Row="1"
             PaneDisplayMode="Auto" OpenPaneLength="200" CompactModeThresholdWidth="0"
             IsPaneToggleButtonVisible="False" IsBackButtonVisible="Collapsed" IsSettingsVisible="True"
@@ -30,7 +27,7 @@
                     Severity="Warning" Title="Warning" Visibility="Collapsed" CloseButtonClick="HideInfoBar">
                     <StackPanel x:Name="InfoBarContent" Padding="0,0,16,16" Spacing="8" />
                 </InfoBar>
-                <Frame x:Name="ContentFrame" Grid.Row="1" />
+                <Frame x:Name="ContentFrame" Grid.Row="1" Navigated="OnFrameNavigated" />
                 <Grid x:Name="LoadingBackground" Grid.RowSpan="2" Canvas.ZIndex="100" Visibility="Collapsed">
                     <Rectangle Fill="{ThemeResource SolidBackgroundFillColorBaseBrush}" Opacity="0.94" />
                     <StackPanel Spacing="16" HorizontalAlignment="Center" VerticalAlignment="Center">
