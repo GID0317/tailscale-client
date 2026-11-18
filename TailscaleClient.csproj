@@ -12,6 +12,7 @@
 
 		<RootNamespace>TailscaleClient</RootNamespace>
 		<StartupObject>TailscaleClient.Program</StartupObject>
+		<DefineConstants>$(DefineConstants);DISABLE_XAML_GENERATED_MAIN</DefineConstants>
 		<AssemblyName>TailscaleClient</AssemblyName>
 		<ApplicationIcon>Assets\Icons\AppIconBase-Dark.ico</ApplicationIcon>
 	</PropertyGroup>

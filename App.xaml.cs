@@ -1,5 +1,8 @@
 ﻿using System;
 using Microsoft.UI.Xaml;
+using Microsoft.UI.Xaml.Controls;
+using System.Diagnostics;
+using System.Threading.Tasks;
 using Velopack;
 
 namespace TailscaleClient;
@@ -12,27 +15,30 @@ public partial class App : Application
 
     public App()
     {
-        VelopackApp.Build().Run();
         InitializeComponent();
 
         Core.WindowPersistence.Initialize();
+    }
 
-        var mgr = new UpdateManager("https://tsc.xirreal.dev");
-        
+    private static async Task CheckForUpdatesAsync(InfoBar updateError)
+    {
         try
         {
-            var newVersion = mgr.CheckForUpdates();
+            var mgr = new UpdateManager("https://tsc.xirreal.dev");
+            if (!mgr.IsInstalled || mgr.IsPortable)
+                return;
+            var newVersion = await mgr.CheckForUpdatesAsync();
             if (newVersion == null)
             {
                 return;
             }
 
-            mgr.DownloadUpdates(newVersion);
+            await mgr.DownloadUpdatesAsync(newVersion);
             mgr.ApplyUpdatesAndRestart(newVersion);
         } catch (Exception e)
         {
-            // TODO: Show failed update bar, possibly a badge on settings?
-            return;
+            Debug.WriteLine($"Update failed: {e}");
+            updateError.IsOpen = true;
         }
     }
 
@@ -41,12 +47,24 @@ public partial class App : Application
         var initSuccess = Core.API.Init();
         Core.Utils.InitializeColors();
 
+        var updateError = new InfoBar
+        {
+            Severity = InfoBarSeverity.Warning,
+            Title = "Could not update the app",
+            Message = "You can continue using the app. Updates will be checked again next time you open it.",
+            VerticalAlignment = VerticalAlignment.Bottom,
+            Margin = new Thickness(8)
+        };
+        var content = new Grid();
+        content.Children.Add(initSuccess ? new Views.AppSkeleton() : new Views.Error());
+        content.Children.Add(updateError);
         MainWindow = new MainWindow
         {
-            Content = initSuccess ? new Views.AppSkeleton() : new Views.Error()
+            Content = content
         };
 
         MainWindow.Activate();
+        MainWindow.DispatcherQueue.TryEnqueue(async () => await CheckForUpdatesAsync(updateError));
     }
 
     public static new void Exit()
