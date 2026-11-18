@@ -10,7 +10,12 @@
                 <XamlControlsResources xmlns="using:Microsoft.UI.Xaml.Controls" />
                 <!-- Other merged dictionaries here -->
             </ResourceDictionary.MergedDictionaries>
-            <!-- Other app resources here -->
+            <Style x:Key="PageContentStyle" TargetType="StackPanel">
+                <Setter Property="Padding" Value="24,20,24,32" />
+                <Setter Property="Spacing" Value="24" />
+                <Setter Property="MaxWidth" Value="1008" />
+                <Setter Property="HorizontalAlignment" Value="Left" />
+            </Style>
         </ResourceDictionary>
     </Application.Resources>
 </Application>

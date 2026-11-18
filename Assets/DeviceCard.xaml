@@ -1,68 +1,68 @@
 <?xml version="1.0" encoding="utf-8"?>
-<UserControl
-    x:Class="TailscaleClient.Assets.DeviceCard"
+<UserControl x:Class="TailscaleClient.Assets.DeviceCard"
     xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
-    xmlns:local="using:TailscaleClient.Assets"
-    xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
-    xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
-    mc:Ignorable="d">
-    
-    <StackPanel
-        Margin="0,8,0,0"
-        CornerRadius="8"
-        Padding="12,8,12,8"
-        BorderThickness="1"
-        BorderBrush="{ThemeResource CardStrokeColorDefaultBrush}"
-        Background="{ThemeResource CardBackgroundFillColorDefaultBrush}"
-    >
-        <Grid>
-            <Grid.ColumnDefinitions>
-                <ColumnDefinition Width="Auto"/>
-                <ColumnDefinition Width="*"/>
-                <ColumnDefinition Width="Auto"/>
-            </Grid.ColumnDefinitions>
-            <BitmapIcon Grid.Column="0" Width="12" Height="12" UriSource="{x:Bind OSIcon, Mode=OneTime}" Foreground="{ThemeResource TextFillColorPrimary}"/>
-            <TextBlock Grid.Column="1" x:Name ="hostnameTextBlock" Style="{StaticResource BodyStrongTextBlockStyle}" Text="{x:Bind Hostname, Mode=OneTime}" Margin="6,0,0,4" ToolTipService.ToolTip="Click to copy" PointerReleased="CopyToClipboard" PointerEntered="HoverStart" PointerExited="HoverEnd"/>
-            <Ellipse Height="24" Width="24" Margin="0,0,-2,0" HorizontalAlignment="Right" Grid.Column="2" ToolTipService.ToolTip="{x:Bind OwnedByString, Mode=OneTime}" Visibility="{x:Bind IsOwnedByCurrentUser, Mode=OneTime}">
-                <Ellipse.Fill>
-                    <ImageBrush>
-                        <ImageBrush.ImageSource>
-                            <BitmapImage UriSource="{x:Bind ProfilePicture, Mode=OneWay}">
-                                <BitmapImage.DecodePixelHeight>64</BitmapImage.DecodePixelHeight>
-                                <BitmapImage.DecodePixelWidth>64</BitmapImage.DecodePixelWidth>
-                            </BitmapImage>
-                        </ImageBrush.ImageSource>
-                    </ImageBrush>
-                </Ellipse.Fill>
-            </Ellipse>
-        </Grid>
-        
-        <StackPanel Orientation="Horizontal">
-            <TextBlock Text="Tailscale IPv4: " Margin="0,0,4,0"/>
-            <TextBlock x:Name ="ipv4TextBlock" Foreground="{StaticResource TextFillColorSecondary}" Text="{x:Bind IPv4, Mode=OneTime}" ToolTipService.ToolTip="Click to copy" PointerReleased="CopyToClipboard" PointerEntered="HoverStart" PointerExited="HoverEnd"/>
+    xmlns:controls="using:CommunityToolkit.WinUI.Controls">
+    <controls:SettingsCard ContentAlignment="Vertical" HorizontalContentAlignment="Stretch">
+        <StackPanel Spacing="12">
+            <Grid ColumnSpacing="12">
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="Auto" /><ColumnDefinition Width="*" />
+                    <ColumnDefinition Width="Auto" /><ColumnDefinition Width="Auto" />
+                </Grid.ColumnDefinitions>
+                <BitmapIcon Width="20" Height="20" UriSource="{x:Bind OSIcon, Mode=OneTime}"
+                    Foreground="{ThemeResource TextFillColorSecondaryBrush}" />
+                <TextBlock x:Name="hostnameTextBlock" Grid.Column="1" Text="{x:Bind Hostname, Mode=OneTime}"
+                    FontSize="16" FontWeight="SemiBold" TextTrimming="CharacterEllipsis" VerticalAlignment="Center"
+                    ToolTipService.ToolTip="{x:Bind Hostname, Mode=OneTime}"
+                    PointerReleased="CopyToClipboard" PointerEntered="HoverStart" PointerExited="HoverEnd" />
+                <Ellipse Grid.Column="2" Width="28" Height="28"
+                    ToolTipService.ToolTip="{x:Bind OwnedByString, Mode=OneTime}" Visibility="{x:Bind IsOwnedByCurrentUser, Mode=OneTime}">
+                    <Ellipse.Fill><ImageBrush><ImageBrush.ImageSource>
+                        <BitmapImage UriSource="{x:Bind ProfilePicture, Mode=OneWay}" DecodePixelHeight="56" DecodePixelWidth="56" />
+                    </ImageBrush.ImageSource></ImageBrush></Ellipse.Fill>
+                </Ellipse>
+                <Button Grid.Column="3" Tag="{x:Bind Hostname, Mode=OneTime}" Click="CopyAddress" Padding="6"
+                    ToolTipService.ToolTip="Copy device name" AutomationProperties.Name="Copy device name">
+                    <FontIcon Glyph="&#xE8C8;" FontSize="14" />
+                </Button>
+            </Grid>
+            <Grid ColumnSpacing="12" RowSpacing="4">
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="72" /><ColumnDefinition Width="*" /><ColumnDefinition Width="Auto" />
+                </Grid.ColumnDefinitions>
+                <Grid.RowDefinitions><RowDefinition Height="Auto" /><RowDefinition Height="Auto" /><RowDefinition Height="Auto" /></Grid.RowDefinitions>
+                <TextBlock Text="IPv4" Foreground="{ThemeResource TextFillColorSecondaryBrush}" VerticalAlignment="Center" />
+                <TextBlock x:Name="ipv4TextBlock" Grid.Column="1" Text="{x:Bind IPv4, Mode=OneTime}"
+                    FontFamily="Consolas" TextWrapping="Wrap" VerticalAlignment="Center" IsTextSelectionEnabled="True" />
+                <Button Grid.Column="2" Tag="{x:Bind IPv4, Mode=OneTime}" Click="CopyAddress" Padding="6"
+                    ToolTipService.ToolTip="Copy IPv4 address" AutomationProperties.Name="Copy IPv4 address">
+                    <FontIcon Glyph="&#xE8C8;" FontSize="14" />
+                </Button>
+                <TextBlock Grid.Row="1" Text="IPv6" Foreground="{ThemeResource TextFillColorSecondaryBrush}" VerticalAlignment="Center" />
+                <TextBlock x:Name="ipv6TextBlock" Grid.Row="1" Grid.Column="1" Text="{x:Bind IPv6, Mode=OneTime}"
+                    FontFamily="Consolas" TextWrapping="Wrap" VerticalAlignment="Center" IsTextSelectionEnabled="True" />
+                <Button Grid.Row="1" Grid.Column="2" Tag="{x:Bind IPv6, Mode=OneTime}" Click="CopyAddress" Padding="6"
+                    ToolTipService.ToolTip="Copy IPv6 address" AutomationProperties.Name="Copy IPv6 address">
+                    <FontIcon Glyph="&#xE8C8;" FontSize="14" />
+                </Button>
+                <TextBlock Grid.Row="2" Text="DNS name" Foreground="{ThemeResource TextFillColorSecondaryBrush}" VerticalAlignment="Center" />
+                <TextBlock x:Name="fqdnTextBlock" Grid.Row="2" Grid.Column="1" Text="{x:Bind TailnetDNS, Mode=OneTime}"
+                    TextWrapping="Wrap" VerticalAlignment="Center" IsTextSelectionEnabled="True" />
+                <Button Grid.Row="2" Grid.Column="2" Tag="{x:Bind TailnetDNS, Mode=OneTime}" Click="CopyAddress" Padding="6"
+                    ToolTipService.ToolTip="Copy DNS name" AutomationProperties.Name="Copy DNS name">
+                    <FontIcon Glyph="&#xE8C8;" FontSize="14" />
+                </Button>
+            </Grid>
+            <Grid ColumnSpacing="12">
+                <Grid.ColumnDefinitions><ColumnDefinition Width="*" /><ColumnDefinition Width="Auto" /></Grid.ColumnDefinitions>
+                <StackPanel x:Name="TagSection" Orientation="Horizontal" />
+                <StackPanel Grid.Column="1" Orientation="Horizontal" Spacing="6" VerticalAlignment="Center">
+                    <Ellipse Width="8" Height="8" Fill="{x:Bind StatusColor, Mode=OneTime}" VerticalAlignment="Center" />
+                    <TextBlock Text="{x:Bind StatusText, Mode=OneTime}" Foreground="{ThemeResource TextFillColorSecondaryBrush}"
+                        Style="{StaticResource CaptionTextBlockStyle}" />
+                </StackPanel>
+            </Grid>
         </StackPanel>
-        
-        <StackPanel Orientation="Horizontal">
-            <TextBlock Text="Tailscale IPv6: " Margin="0,0,4,0"/>
-            <TextBlock x:Name ="ipv6TextBlock" Foreground="{StaticResource TextFillColorSecondary}" Text="{x:Bind IPv6, Mode=OneTime}" ToolTipService.ToolTip="Click to copy" PointerReleased="CopyToClipboard" PointerEntered="HoverStart" PointerExited="HoverEnd"/>
-        </StackPanel>
-        
-        <StackPanel Orientation="Horizontal">
-            <TextBlock Text="FQDN: " Margin="0,0,4,0"/>
-            <TextBlock x:Name ="fqdnTextBlock" Foreground="{StaticResource TextFillColorSecondary}" Text="{x:Bind TailnetDNS, Mode=OneTime}" ToolTipService.ToolTip="Click to copy" PointerReleased="CopyToClipboard" PointerEntered="HoverStart" PointerExited="HoverEnd"/>
-        </StackPanel>
-        
-        <Grid Margin="0,8,0,0">
-            <Grid.ColumnDefinitions>
-                <ColumnDefinition Width="*"/>
-                <ColumnDefinition Width="Auto"/>
-            </Grid.ColumnDefinitions>
-            <StackPanel x:Name="TagSection" Orientation="Horizontal" Grid.Column="0"/>
-            <StackPanel Orientation="Horizontal" HorizontalAlignment="Right" Grid.Column="1">
-                <TextBlock Foreground="{x:Bind StatusTextColor, Mode=OneTime}" Text="{x:Bind StatusText, Mode=OneTime}" Style="{StaticResource CaptionTextBlockStyle}" Margin="0,0,5,0" VerticalAlignment="Center"/>
-                <Ellipse Margin="0,1,0,0" Height="12" Width="12" Fill="{x:Bind StatusColor, Mode=OneTime}"></Ellipse>
-            </StackPanel>
-        </Grid>
-    </StackPanel>
+    </controls:SettingsCard>
 </UserControl>

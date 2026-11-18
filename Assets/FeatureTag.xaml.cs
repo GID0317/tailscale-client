@@ -10,7 +10,6 @@ public sealed partial class FeatureTag : UserControl
     private string ToolTipText = "";
     private static readonly SolidColorBrush DefaultColor = Application.Current.Resources["CardBackgroundFillColorDefaultBrush"] as SolidColorBrush;
     private SolidColorBrush BackgroundColor = DefaultColor;
-    private SolidColorBrush ForegroundColor = Application.Current.Resources["TextFillColorPrimaryBrush"] as SolidColorBrush;
 
     public FeatureTag(string text, string tooltip)
     {

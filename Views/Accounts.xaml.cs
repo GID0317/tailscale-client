@@ -55,6 +55,7 @@ public sealed partial class Accounts : Page, INotifyPropertyChanged
         {
             AccountList.Children.Add(new AccountCard(account, false));
         }
+        NoAccountsMessage.Visibility = accounts.Count == 0 ? Visibility.Visible : Visibility.Collapsed;
     }
 
     public Accounts()

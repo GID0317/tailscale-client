@@ -27,6 +27,7 @@
 	<ItemGroup>
 		<PackageReference Include="Microsoft.WindowsAppSDK" Version="1.7.250401001" />
 		<PackageReference Include="CommunityToolkit.Mvvm" Version="8.4.0" />
+		<PackageReference Include="CommunityToolkit.WinUI.Controls.SettingsControls" Version="8.2.251219" />
 		<PackageReference Include="H.NotifyIcon.WinUI" Version="2.3.0" />
 		<PackageReference Include="Nerdbank.GitVersioning" Version="3.7.115">
 		  <PrivateAssets>all</PrivateAssets>

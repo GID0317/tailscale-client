@@ -5,8 +5,10 @@
     xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
     xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
     xmlns:windowex="using:WinUIEx"
-    Width="600"
-    Height="1000"
+    Width="1080"
+    Height="760"
+    MinWidth="480"
+    MinHeight="480"
     Closed="WindowEx_Closed"
     PersistenceId="MainWindow"
     mc:Ignorable="d">

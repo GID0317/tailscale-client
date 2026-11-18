@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Threading.Tasks;
 using Microsoft.UI.Input;
+using Microsoft.UI.Xaml;
 using Microsoft.UI.Xaml.Controls;
 using Microsoft.UI.Xaml.Controls.Primitives;
 using Microsoft.UI.Xaml.Media;
@@ -14,11 +15,6 @@ public sealed partial class DeviceCard : UserControl
     private static SolidColorBrush GetStatusColor(bool state)
     {
         return Core.Utils.colors[state ? "StatusSuccess" : "StatusFail"];
-    }
-
-    private static SolidColorBrush GetStatusTextColor(bool state)
-    {
-        return Core.Utils.colors[state ? "TextSuccess" : "TextFail"];
     }
 
     private static string FormatDaysUntilExpiry(int daysUntilExpiry)
@@ -53,7 +49,6 @@ public sealed partial class DeviceCard : UserControl
     private readonly string StatusText = "Online";
     private readonly string OSIcon = "ms-appx:///Assets/Platforms/Unknown.png";
     private readonly SolidColorBrush StatusColor = GetStatusColor(true);
-    private readonly SolidColorBrush StatusTextColor = GetStatusTextColor(true);
 
     public readonly string OwnedBy = "-1";
     public readonly string OwnedByString = "Owned by Unknown";
@@ -71,7 +66,6 @@ public sealed partial class DeviceCard : UserControl
 
         StatusText = "Disconnected";
         StatusColor = GetStatusColor(false);
-        StatusTextColor = GetStatusTextColor(false);
         OSIcon = "ms-appx:///Assets/Platforms/Unknown.png";
     }
 
@@ -130,7 +124,6 @@ public sealed partial class DeviceCard : UserControl
             StatusText = "Action required";
         }
         StatusColor = GetStatusColor(device.Online);
-        StatusTextColor = GetStatusTextColor(device.Online);
 
         var deviceType = device.OS switch
         {
@@ -190,7 +183,16 @@ public sealed partial class DeviceCard : UserControl
 
     private void CopyToClipboard(object sender, Microsoft.UI.Xaml.Input.PointerRoutedEventArgs e)
     {
-        var text = (sender as TextBlock).Text;
+        CopyText(((TextBlock)sender).Text, (FrameworkElement)sender);
+    }
+
+    private void CopyAddress(object sender, RoutedEventArgs e)
+    {
+        CopyText((string)((Button)sender).Tag, (FrameworkElement)sender);
+    }
+
+    private void CopyText(string text, FrameworkElement anchor)
+    {
         var dataPackage = new DataPackage();
         dataPackage.SetText(text);
         Clipboard.SetContent(dataPackage);
@@ -206,7 +208,7 @@ public sealed partial class DeviceCard : UserControl
             Placement = FlyoutPlacementMode.Bottom,
         };
 
-        flyout.ShowAt(sender as TextBlock);
+        flyout.ShowAt(anchor);
 
         Task.Delay(1500).ContinueWith(
             _ => DispatcherQueue.TryEnqueue(delegate () { flyout.Hide(); }));

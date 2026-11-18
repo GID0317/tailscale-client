@@ -1,40 +1,37 @@
 <?xml version="1.0" encoding="utf-8"?>
-<Page
-    x:Class="TailscaleClient.Views.Accounts"
+<Page x:Class="TailscaleClient.Views.Accounts"
     xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
-    xmlns:local="using:TailscaleClient.Views"
-    xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
-    xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
-    mc:Ignorable="d">
-
-    <Grid Margin="14,8,14,12">
-        <Grid.RowDefinitions>
-            <RowDefinition Height="Auto" />
-            <RowDefinition Height="Auto" />
-            <RowDefinition Height="Auto" />
-            <RowDefinition Height="Auto" />
-            <RowDefinition Height="*" />
-        </Grid.RowDefinitions>
-        
-        <Grid Grid.Row="0">
-            <Grid.ColumnDefinitions>
-                <ColumnDefinition Width="*" />
-                <ColumnDefinition Width="Auto" />
-            </Grid.ColumnDefinitions>
-            <ToggleSwitch IsOn="{x:Bind ConnectionToggle, Mode=TwoWay}" x:Name="ConnectionSwitch" Margin="6,0,0,0" Toggled="ConnectionToggled" OnContent="Connected to Tailscale." OffContent="Disconnected from Tailscale." />
-            <Button Grid.Column="1" Click="AddProfile">Add new profile</Button>
-        </Grid>
-        
-        <TextBlock Grid.Row="1" Margin="0,8,0,0" Style="{ThemeResource BaseTextBlockStyle}" Text="Current profile:"></TextBlock>
-
-        <StackPanel Grid.Row="2" x:Name="CurrentAccount"/>
-        
-        <TextBlock Grid.Row="3" Margin="0,8,0,0" Style="{ThemeResource BaseTextBlockStyle}">Available profiles:</TextBlock>
-
-        <ScrollViewer Grid.Row="4" Margin="0,0,-12,0">
-            <StackPanel x:Name="AccountList" Margin="0,0,12,0"/>
-        </ScrollViewer>
-    </Grid>
+    xmlns:controls="using:CommunityToolkit.WinUI.Controls">
+    <ScrollViewer x:Name="PageScrollViewer" HorizontalScrollMode="Disabled" HorizontalScrollBarVisibility="Disabled"
+        VerticalScrollBarVisibility="Auto" HorizontalContentAlignment="Stretch">
+        <StackPanel Style="{StaticResource PageContentStyle}" Width="{Binding ViewportWidth, ElementName=PageScrollViewer}">
+            <Grid ColumnSpacing="16">
+                <Grid.ColumnDefinitions><ColumnDefinition Width="*" /><ColumnDefinition Width="Auto" /></Grid.ColumnDefinitions>
+                <StackPanel Spacing="4">
+                    <TextBlock Text="Accounts" Style="{StaticResource TitleTextBlockStyle}" />
+                    <TextBlock Text="Manage your connection and switch between saved accounts."
+                        Foreground="{ThemeResource TextFillColorSecondaryBrush}" TextWrapping="Wrap" />
+                </StackPanel>
+                <Button Grid.Column="1" Content="Add account" Click="AddProfile" VerticalAlignment="Center"
+                    Style="{StaticResource AccentButtonStyle}" AutomationProperties.AutomationId="AddAccount" />
+            </Grid>
+            <controls:SettingsCard Header="Connect to Tailscale" Description="Pause or resume this device's connection.">
+                <controls:SettingsCard.HeaderIcon><FontIcon Glyph="&#xE839;" /></controls:SettingsCard.HeaderIcon>
+                <ToggleSwitch x:Name="ConnectionSwitch"
+                    IsOn="{x:Bind ConnectionToggle, Mode=TwoWay}" Toggled="ConnectionToggled"
+                    OnContent="Connected" OffContent="Disconnected" AutomationProperties.Name="Connect to Tailscale" />
+            </controls:SettingsCard>
+            <StackPanel Spacing="8">
+                <TextBlock Text="Current account" Style="{StaticResource BodyStrongTextBlockStyle}" />
+                <StackPanel x:Name="CurrentAccount" Spacing="8" />
+            </StackPanel>
+            <StackPanel Spacing="8">
+                <TextBlock Text="Other accounts" Style="{StaticResource BodyStrongTextBlockStyle}" />
+                <StackPanel x:Name="AccountList" Spacing="8" />
+                <TextBlock x:Name="NoAccountsMessage" Text="Add another account to switch between tailnets."
+                    Foreground="{ThemeResource TextFillColorSecondaryBrush}" TextWrapping="Wrap" Visibility="Collapsed" Margin="0,8" />
+            </StackPanel>
+        </StackPanel>
+    </ScrollViewer>
 </Page>
-    

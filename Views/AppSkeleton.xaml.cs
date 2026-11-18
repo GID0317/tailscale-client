@@ -3,7 +3,6 @@ using System.ComponentModel;
 using System.Runtime.CompilerServices;
 using Microsoft.UI.Xaml;
 using Microsoft.UI.Xaml.Controls;
-using Microsoft.UI.Xaml.Media.Animation;
 
 namespace TailscaleClient.Views;
 
@@ -34,12 +33,10 @@ public sealed partial class AppSkeleton : Page, INotifyPropertyChanged
         if (status.BackendState == "NeedsLogin")
         {
             NavigationViewControl.SelectedItem = NavigationViewControl.MenuItems[1];
-            ContentFrame.Navigate(typeof(Accounts), null, new SuppressNavigationTransitionInfo());
         }
         else
         {
             NavigationViewControl.SelectedItem = NavigationViewControl.MenuItems[0];
-            ContentFrame.Navigate(typeof(Home), null, new SuppressNavigationTransitionInfo());
         }
 
         Core.Messaging.Instance.MessageReceived += (sender, e) =>
@@ -59,7 +56,8 @@ public sealed partial class AppSkeleton : Page, INotifyPropertyChanged
 
     private void OnNavigate(NavigationView sender, NavigationViewSelectionChangedEventArgs args)
     {
-        var selectedItem = (NavigationViewItem)args.SelectedItem;
+        if (args.SelectedItem is not NavigationViewItem selectedItem)
+            return;
         System.Type whereTo = null;
 
         switch (selectedItem.Tag)

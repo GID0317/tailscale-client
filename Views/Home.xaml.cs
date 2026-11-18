@@ -65,9 +65,6 @@ public sealed partial class Home : Page, INotifyPropertyChanged
         UserName = _profile.UserProfile.DisplayName;
         var pfp = _profile.UserProfile.ProfilePicURL;
 
-        // the spacing really bothered me.
-        UserNameBlock.Margin = new(string.IsNullOrEmpty(UserName) ? -4 : 4, 5, 12, 0);
-        
         if (Uri.TryCreate(pfp, UriKind.Absolute, out _))
         {
             ProfilePicture = pfp;
@@ -83,6 +80,7 @@ public sealed partial class Home : Page, INotifyPropertyChanged
             };
 
             MyDevice.Children.Add(new Assets.DeviceCard());
+            FilterDevices(OwnedDevicesFilter.IsChecked != true);
             return;
         }
 
@@ -94,6 +92,7 @@ public sealed partial class Home : Page, INotifyPropertyChanged
         {
             OtherDevices.Children.Add(new Assets.DeviceCard(device, _status.User, UserID));
         }
+        FilterDevices(OwnedDevicesFilter.IsChecked != true);
     }
 
     public Home()
@@ -117,6 +116,7 @@ public sealed partial class Home : Page, INotifyPropertyChanged
 
     private void FilterDevices(bool show)
     {
+        var visibleDevices = 0;
         foreach (var child in OtherDevices.Children)
         {
             if (child is Assets.DeviceCard device && device.OwnedBy != UserID)
@@ -130,7 +130,10 @@ public sealed partial class Home : Page, INotifyPropertyChanged
                     device.Hide();
                 }
             }
+            if (child.Visibility == Visibility.Visible)
+                visibleDevices++;
         }
+        NoDevicesMessage.Visibility = visibleDevices == 0 ? Visibility.Visible : Visibility.Collapsed;
     }
 
     private void Hide(object s, RoutedEventArgs e) => FilterDevices(false);

@@ -16,6 +16,6 @@
         BorderBrush="{ThemeResource CardStrokeColorDefaultBrush}"
         Background="{x:Bind BackgroundColor}"
     >
-        <TextBlock Text="{x:Bind TagText, Mode=OneTime}" Foreground="{x:Bind ForegroundColor, Mode=OneTime}" Style="{ThemeResource CaptionTextBlockStyle}" ToolTipService.ToolTip="{x:Bind ToolTipText, Mode=OneTime}"/>
+        <TextBlock Text="{x:Bind TagText, Mode=OneTime}" Foreground="{ThemeResource TextFillColorPrimaryBrush}" Style="{ThemeResource CaptionTextBlockStyle}" ToolTipService.ToolTip="{x:Bind ToolTipText, Mode=OneTime}"/>
     </StackPanel>
 </UserControl>
