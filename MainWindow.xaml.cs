@@ -31,6 +31,7 @@ public sealed partial class MainWindow : WindowEx
 
     private void WindowEx_Closed(object sender, WindowEventArgs args)
     {
+        Core.WindowPersistence.Save();
         if (App.CanCloseWindow)
         {
             App.Exit();

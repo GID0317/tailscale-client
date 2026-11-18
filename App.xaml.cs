@@ -15,6 +15,8 @@ public partial class App : Application
         VelopackApp.Build().Run();
         InitializeComponent();
 
+        Core.WindowPersistence.Initialize();
+
         var mgr = new UpdateManager("https://tsc.xirreal.dev");
         
         try
