@@ -55,9 +55,10 @@ public partial class App : Application
             VerticalAlignment = VerticalAlignment.Bottom,
             Margin = new Thickness(8)
         };
-        var content = new Grid();
-        content.Children.Add(initSuccess ? new Views.AppSkeleton() : new Views.Error());
-        content.Children.Add(updateError);
+        Page content = initSuccess ? new Views.AppSkeleton() : new Views.Error();
+        Grid.SetRowSpan(updateError, 2);
+        Canvas.SetZIndex(updateError, 200);
+        ((Grid)content.Content).Children.Add(updateError);
         MainWindow = new MainWindow
         {
             Content = content
