@@ -14,7 +14,10 @@
                 <Setter Property="Padding" Value="24,20,24,32" />
                 <Setter Property="Spacing" Value="24" />
                 <Setter Property="MaxWidth" Value="1008" />
-                <Setter Property="HorizontalAlignment" Value="Left" />
+                <Setter Property="HorizontalAlignment" Value="Center" />
+            </Style>
+            <Style x:Key="AppThemePageStyle" TargetType="Page">
+                <Setter Property="Background" Value="{ThemeResource SolidBackgroundFillColorBaseBrush}" />
             </Style>
         </ResourceDictionary>
     </Application.Resources>

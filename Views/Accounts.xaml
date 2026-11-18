@@ -5,33 +5,31 @@
     xmlns:controls="using:CommunityToolkit.WinUI.Controls">
     <ScrollViewer x:Name="PageScrollViewer" HorizontalScrollMode="Disabled" HorizontalScrollBarVisibility="Disabled"
         VerticalScrollBarVisibility="Auto" HorizontalContentAlignment="Stretch">
-        <StackPanel Style="{StaticResource PageContentStyle}" Width="{Binding ViewportWidth, ElementName=PageScrollViewer}">
-            <Grid ColumnSpacing="16">
-                <Grid.ColumnDefinitions><ColumnDefinition Width="*" /><ColumnDefinition Width="Auto" /></Grid.ColumnDefinitions>
-                <StackPanel Spacing="4">
+        <Grid Width="{Binding ViewportWidth, ElementName=PageScrollViewer}">
+            <StackPanel Style="{StaticResource PageContentStyle}" Width="{Binding ViewportWidth, ElementName=PageScrollViewer}">
+                <Grid ColumnSpacing="16">
+                    <Grid.ColumnDefinitions><ColumnDefinition Width="*" /><ColumnDefinition Width="Auto" /></Grid.ColumnDefinitions>
                     <TextBlock Text="Accounts" Style="{StaticResource TitleTextBlockStyle}" />
-                    <TextBlock Text="Manage your connection and switch between saved accounts."
-                        Foreground="{ThemeResource TextFillColorSecondaryBrush}" TextWrapping="Wrap" />
+                    <Button Grid.Column="1" Content="Add account" Click="AddProfile" VerticalAlignment="Center"
+                        Style="{StaticResource AccentButtonStyle}" AutomationProperties.AutomationId="AddAccount" />
+                </Grid>
+                <controls:SettingsCard Header="Connect to Tailscale" Description="Pause or resume this device's connection.">
+                    <controls:SettingsCard.HeaderIcon><FontIcon Glyph="&#xE839;" /></controls:SettingsCard.HeaderIcon>
+                    <ToggleSwitch x:Name="ConnectionSwitch"
+                        IsOn="{x:Bind ConnectionToggle, Mode=TwoWay}" Toggled="ConnectionToggled"
+                        OnContent="Connected" OffContent="Disconnected" AutomationProperties.Name="Connect to Tailscale" />
+                </controls:SettingsCard>
+                <StackPanel Spacing="8">
+                    <TextBlock Text="Current account" Style="{StaticResource BodyStrongTextBlockStyle}" />
+                    <StackPanel x:Name="CurrentAccount" Spacing="8" />
                 </StackPanel>
-                <Button Grid.Column="1" Content="Add account" Click="AddProfile" VerticalAlignment="Center"
-                    Style="{StaticResource AccentButtonStyle}" AutomationProperties.AutomationId="AddAccount" />
-            </Grid>
-            <controls:SettingsCard Header="Connect to Tailscale" Description="Pause or resume this device's connection.">
-                <controls:SettingsCard.HeaderIcon><FontIcon Glyph="&#xE839;" /></controls:SettingsCard.HeaderIcon>
-                <ToggleSwitch x:Name="ConnectionSwitch"
-                    IsOn="{x:Bind ConnectionToggle, Mode=TwoWay}" Toggled="ConnectionToggled"
-                    OnContent="Connected" OffContent="Disconnected" AutomationProperties.Name="Connect to Tailscale" />
-            </controls:SettingsCard>
-            <StackPanel Spacing="8">
-                <TextBlock Text="Current account" Style="{StaticResource BodyStrongTextBlockStyle}" />
-                <StackPanel x:Name="CurrentAccount" Spacing="8" />
+                <StackPanel Spacing="8">
+                    <TextBlock Text="Other accounts" Style="{StaticResource BodyStrongTextBlockStyle}" />
+                    <StackPanel x:Name="AccountList" Spacing="8" />
+                    <TextBlock x:Name="NoAccountsMessage" Text="Add another account to switch between tailnets."
+                        Foreground="{ThemeResource TextFillColorSecondaryBrush}" TextWrapping="Wrap" Visibility="Collapsed" Margin="0,8" />
+                </StackPanel>
             </StackPanel>
-            <StackPanel Spacing="8">
-                <TextBlock Text="Other accounts" Style="{StaticResource BodyStrongTextBlockStyle}" />
-                <StackPanel x:Name="AccountList" Spacing="8" />
-                <TextBlock x:Name="NoAccountsMessage" Text="Add another account to switch between tailnets."
-                    Foreground="{ThemeResource TextFillColorSecondaryBrush}" TextWrapping="Wrap" Visibility="Collapsed" Margin="0,8" />
-            </StackPanel>
-        </StackPanel>
+        </Grid>
     </ScrollViewer>
 </Page>

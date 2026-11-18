@@ -54,29 +54,23 @@ public sealed partial class AppSkeleton : Page, INotifyPropertyChanged
         App.MainWindow.SetTitleBar(AppTitleBar);
     }
 
+    private void OnPaneToggleRequested(TitleBar sender, object args)
+    {
+        if (NavigationViewControl.IsEnabled)
+            NavigationViewControl.IsPaneOpen = !NavigationViewControl.IsPaneOpen;
+    }
+
     private void OnNavigate(NavigationView sender, NavigationViewSelectionChangedEventArgs args)
     {
-        if (args.SelectedItem is not NavigationViewItem selectedItem)
-            return;
-        System.Type whereTo = null;
-
-        switch (selectedItem.Tag)
+        var page = args.IsSettingsSelected ? typeof(Settings) : (args.SelectedItem as NavigationViewItem)?.Tag switch
         {
-            case "Home":
-                whereTo = typeof(Home);
-                break;
-            case "Accounts":
-                whereTo = typeof(Accounts);
-                break;
-            case "Settings":
-                whereTo = typeof(Settings);
-                break;
-        }
+            "Home" => typeof(Home),
+            "Accounts" => typeof(Accounts),
+            _ => null
+        };
 
-        if (whereTo != null)
-        {
-            ContentFrame.Navigate(whereTo, null, args.RecommendedNavigationTransitionInfo);
-        }
+        if (page != null && ContentFrame.CurrentSourcePageType != page)
+            ContentFrame.Navigate(page, null, args.RecommendedNavigationTransitionInfo);
     }
 
     public void DisableUI()

@@ -1,3 +1,4 @@
+using System;
 using System.Collections.Generic;
 using System.ComponentModel;
 using System.Diagnostics;
@@ -130,6 +131,8 @@ public sealed partial class Settings : Page, INotifyPropertyChanged
     public Settings()
     {
         InitializeComponent();
+        ThemeSelector.SelectedValue = (App.MainWindow?.Content as FrameworkElement)?.RequestedTheme.ToString()
+            ?? nameof(ElementTheme.Default);
 
         Messaging.Instance.MessageReceived += (sender, e) =>
         {
@@ -144,6 +147,18 @@ public sealed partial class Settings : Page, INotifyPropertyChanged
         };
 
         UpdateUI();
+    }
+
+    private void ThemeChanged(object sender, SelectionChangedEventArgs e)
+    {
+        if (ThemeSelector?.SelectedValue is not string value ||
+            !Enum.TryParse<ElementTheme>(value, out var theme) ||
+            App.MainWindow?.Content is not FrameworkElement root ||
+            root.RequestedTheme == theme)
+            return;
+
+        App.MainWindow.ApplyTheme(theme);
+        ThemeSaveWarning.IsOpen = !ThemePreference.TrySave(theme);
     }
 
     private void UpdatePrefsShields(object _sender, RoutedEventArgs e)

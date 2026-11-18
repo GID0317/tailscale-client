@@ -59,10 +59,8 @@ public partial class App : Application
         Grid.SetRowSpan(updateError, 2);
         Canvas.SetZIndex(updateError, 200);
         ((Grid)content.Content).Children.Add(updateError);
-        MainWindow = new MainWindow
-        {
-            Content = content
-        };
+        MainWindow = new MainWindow(content);
+        MainWindow.ApplyTheme(Core.ThemePreference.Load());
 
         MainWindow.Activate();
         MainWindow.DispatcherQueue.TryEnqueue(async () => await CheckForUpdatesAsync(updateError));

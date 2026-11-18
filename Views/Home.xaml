@@ -4,38 +4,37 @@
     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml">
     <ScrollViewer x:Name="PageScrollViewer" HorizontalScrollMode="Disabled" HorizontalScrollBarVisibility="Disabled"
         VerticalScrollBarVisibility="Auto" HorizontalContentAlignment="Stretch">
-        <StackPanel Style="{StaticResource PageContentStyle}" Width="{Binding ViewportWidth, ElementName=PageScrollViewer}">
-            <StackPanel Spacing="4">
+        <Grid Width="{Binding ViewportWidth, ElementName=PageScrollViewer}">
+            <StackPanel Style="{StaticResource PageContentStyle}" Width="{Binding ViewportWidth, ElementName=PageScrollViewer}">
                 <TextBlock Text="Devices" Style="{StaticResource TitleTextBlockStyle}" />
-                <TextBlock Text="Find devices and copy their Tailscale addresses." Foreground="{ThemeResource TextFillColorSecondaryBrush}" TextWrapping="Wrap" />
-            </StackPanel>
-            <Grid ColumnSpacing="16">
-                <Grid.ColumnDefinitions><ColumnDefinition Width="*" /><ColumnDefinition Width="Auto" /></Grid.ColumnDefinitions>
-                <StackPanel Spacing="4">
-                    <TextBlock Text="{x:Bind AmIConnected, Mode=OneWay}" Style="{StaticResource CaptionTextBlockStyle}" Foreground="{ThemeResource TextFillColorSecondaryBrush}" />
-                    <TextBlock x:Name="UserNameBlock" Text="{x:Bind UserName, Mode=OneWay}" Style="{StaticResource SubtitleTextBlockStyle}" TextWrapping="Wrap" />
-                </StackPanel>
-                <Ellipse Grid.Column="1" Width="40" Height="40">
-                    <Ellipse.Fill><ImageBrush><ImageBrush.ImageSource>
-                        <BitmapImage UriSource="{x:Bind ProfilePicture, Mode=OneWay}" DecodePixelHeight="80" DecodePixelWidth="80" />
-                    </ImageBrush.ImageSource></ImageBrush></Ellipse.Fill>
-                </Ellipse>
-            </Grid>
-            <StackPanel Spacing="8">
-                <TextBlock Text="This device" Style="{StaticResource BodyStrongTextBlockStyle}" />
-                <StackPanel x:Name="MyDevice" Spacing="8" />
-            </StackPanel>
-            <StackPanel Spacing="8">
                 <Grid ColumnSpacing="16">
                     <Grid.ColumnDefinitions><ColumnDefinition Width="*" /><ColumnDefinition Width="Auto" /></Grid.ColumnDefinitions>
-                    <TextBlock Text="Other devices" Style="{StaticResource BodyStrongTextBlockStyle}" VerticalAlignment="Center" />
-                    <CheckBox x:Name="OwnedDevicesFilter" Grid.Column="1" Content="Only my devices"
-                        Checked="Hide" Unchecked="Show" AutomationProperties.AutomationId="OwnedDevicesFilter" />
+                    <StackPanel Spacing="4">
+                        <TextBlock Text="{x:Bind AmIConnected, Mode=OneWay}" Style="{StaticResource CaptionTextBlockStyle}" Foreground="{ThemeResource TextFillColorSecondaryBrush}" />
+                        <TextBlock x:Name="UserNameBlock" Text="{x:Bind UserName, Mode=OneWay}" Style="{StaticResource SubtitleTextBlockStyle}" TextWrapping="Wrap" />
+                    </StackPanel>
+                    <Ellipse Grid.Column="1" Width="40" Height="40">
+                        <Ellipse.Fill><ImageBrush><ImageBrush.ImageSource>
+                            <BitmapImage UriSource="{x:Bind ProfilePicture, Mode=OneWay}" DecodePixelHeight="80" DecodePixelWidth="80" />
+                        </ImageBrush.ImageSource></ImageBrush></Ellipse.Fill>
+                    </Ellipse>
                 </Grid>
-                <StackPanel x:Name="OtherDevices" Spacing="8" />
-                <TextBlock x:Name="NoDevicesMessage" Text="No other devices to show."
-                    Foreground="{ThemeResource TextFillColorSecondaryBrush}" TextWrapping="Wrap" Visibility="Collapsed" Margin="0,8" />
+                <StackPanel Spacing="8">
+                    <TextBlock Text="This device" Style="{StaticResource BodyStrongTextBlockStyle}" />
+                    <StackPanel x:Name="MyDevice" Spacing="8" />
+                </StackPanel>
+                <StackPanel Spacing="8">
+                    <Grid ColumnSpacing="16">
+                        <Grid.ColumnDefinitions><ColumnDefinition Width="*" /><ColumnDefinition Width="Auto" /></Grid.ColumnDefinitions>
+                        <TextBlock Text="Other devices" Style="{StaticResource BodyStrongTextBlockStyle}" VerticalAlignment="Center" />
+                        <CheckBox x:Name="OwnedDevicesFilter" Grid.Column="1" Content="Only my devices"
+                            Checked="Hide" Unchecked="Show" AutomationProperties.AutomationId="OwnedDevicesFilter" />
+                    </Grid>
+                    <StackPanel x:Name="OtherDevices" Spacing="8" />
+                    <TextBlock x:Name="NoDevicesMessage" Text="No other devices to show."
+                        Foreground="{ThemeResource TextFillColorSecondaryBrush}" TextWrapping="Wrap" Visibility="Collapsed" Margin="0,8" />
+                </StackPanel>
             </StackPanel>
-        </StackPanel>
+        </Grid>
     </ScrollViewer>
 </Page>

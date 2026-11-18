@@ -5,63 +5,86 @@
     xmlns:controls="using:CommunityToolkit.WinUI.Controls">
     <ScrollViewer x:Name="SettingsScrollViewer" HorizontalScrollMode="Disabled"
         HorizontalScrollBarVisibility="Disabled" VerticalScrollBarVisibility="Auto" HorizontalContentAlignment="Stretch">
-        <StackPanel Style="{StaticResource PageContentStyle}" Width="{Binding ViewportWidth, ElementName=SettingsScrollViewer}">
-            <StackPanel Spacing="4">
+        <Grid Width="{Binding ViewportWidth, ElementName=SettingsScrollViewer}">
+            <StackPanel Style="{StaticResource PageContentStyle}" Width="{Binding ViewportWidth, ElementName=SettingsScrollViewer}">
                 <TextBlock Text="Settings" Style="{StaticResource TitleTextBlockStyle}" />
-                <TextBlock Text="Choose how this device connects to your tailnet." Foreground="{ThemeResource TextFillColorSecondaryBrush}" TextWrapping="Wrap" />
-            </StackPanel>
-            <StackPanel Spacing="8">
-                <TextBlock Text="Routing" Style="{StaticResource BodyStrongTextBlockStyle}" />
-                <controls:SettingsCard Header="Exit node"
-                    Description="Route internet traffic through another device in your tailnet. Choose None to use your usual connection.">
-                    <controls:SettingsCard.HeaderIcon><FontIcon Glyph="&#xE774;" /></controls:SettingsCard.HeaderIcon>
-                    <ComboBox x:Name="ExitNodeList" Width="220" PlaceholderText="Select an exit node"
-                        SelectedIndex="{x:Bind CurrentNode, Mode=OneWay}" SelectionChanged="ExitNodeChanged"
-                        AutomationProperties.Name="Exit node" />
-                </controls:SettingsCard>
-                <HyperlinkButton Content="About exit nodes" Padding="0" HorizontalAlignment="Left"
-                    NavigateUri="https://tailscale.com/kb/1103/exit-nodes" />
-            </StackPanel>
-            <StackPanel Spacing="8">
-                <TextBlock Text="Network preferences" Style="{StaticResource BodyStrongTextBlockStyle}" />
-                <controls:SettingsCard Header="Allow incoming connections"
-                    Description="Let other devices connect to this device over Tailscale.">
-                    <controls:SettingsCard.HeaderIcon><FontIcon Glyph="&#xE72E;" /></controls:SettingsCard.HeaderIcon>
-                    <ToggleSwitch x:Name="IncomingTrafficSwitch" MinWidth="0"
-                        IsOn="{x:Bind IncomingTrafficEnabled, Mode=TwoWay}" Toggled="UpdatePrefsShields"
-                        AutomationProperties.Name="Allow incoming connections" />
-                </controls:SettingsCard>
-                <controls:SettingsCard Header="Use Tailscale DNS"
-                    Description="Use your tailnet's DNS settings, including MagicDNS and split DNS.">
-                    <controls:SettingsCard.HeaderIcon><FontIcon Glyph="&#xE774;" /></controls:SettingsCard.HeaderIcon>
-                    <ToggleSwitch x:Name="DnsSwitch" MinWidth="0"
-                        IsOn="{x:Bind TailscaleDnsEnabled, Mode=TwoWay}" Toggled="UpdatePrefsDns"
-                        AutomationProperties.Name="Use Tailscale DNS" />
-                </controls:SettingsCard>
-                <controls:SettingsCard Header="Accept subnet routes"
-                    Description="Reach networks shared by subnet routers in your tailnet.">
-                    <controls:SettingsCard.HeaderIcon><FontIcon Glyph="&#xE968;" /></controls:SettingsCard.HeaderIcon>
-                    <ToggleSwitch x:Name="SubnetRoutesSwitch" MinWidth="0"
-                        IsOn="{x:Bind SubnetRoutesEnabled, Mode=TwoWay}" Toggled="UpdatePrefsRoutes"
-                        AutomationProperties.Name="Accept subnet routes" />
-                </controls:SettingsCard>
-            </StackPanel>
-            <controls:SettingsExpander x:Name="AdvancedSettingsExpander" Header="Advanced settings"
-                Description="Share this device's internet connection.">
-                <controls:SettingsExpander.HeaderIcon><FontIcon Glyph="&#xE713;" /></controls:SettingsExpander.HeaderIcon>
-                <controls:SettingsExpander.Items>
-                    <controls:SettingsCard Header="Advertise as an exit node"
-                        Description="Offer this device as an exit node so other devices can route internet traffic through it.">
-                        <ToggleSwitch x:Name="AdvertiseExitNodeSwitch" MinWidth="0"
-                            IsOn="{x:Bind AdvertiseExitNodeEnabled, Mode=OneWay}" Toggled="UpdatePrefsAdvertiseExitNode"
-                            AutomationProperties.Name="Advertise as an exit node" />
+                <StackPanel Spacing="8">
+                    <TextBlock Text="Appearance" Style="{StaticResource BodyStrongTextBlockStyle}" />
+                    <controls:SettingsCard Header="App theme">
+                        <controls:SettingsCard.HeaderIcon><FontIcon Glyph="&#xE790;" /></controls:SettingsCard.HeaderIcon>
+                        <ComboBox x:Name="ThemeSelector" MinWidth="140" SelectedValuePath="Tag"
+                            SelectionChanged="ThemeChanged" AutomationProperties.Name="App theme">
+                            <ComboBoxItem Content="System" Tag="Default" />
+                            <ComboBoxItem Content="Light" Tag="Light" />
+                            <ComboBoxItem Content="Dark" Tag="Dark" />
+                        </ComboBox>
                     </controls:SettingsCard>
-                </controls:SettingsExpander.Items>
-            </controls:SettingsExpander>
-            <StackPanel Orientation="Horizontal" Spacing="8">
-                <TextBlock Text="Version" Foreground="{ThemeResource TextFillColorSecondaryBrush}" Style="{StaticResource CaptionTextBlockStyle}" />
-                <TextBlock Text="{x:Bind VersionText, Mode=OneTime}" Foreground="{ThemeResource TextFillColorSecondaryBrush}" Style="{StaticResource CaptionTextBlockStyle}" />
+                    <InfoBar x:Name="ThemeSaveWarning" Severity="Warning"
+                        Title="Theme could not be saved" Message="The selected theme applies until you close the app." />
+                </StackPanel>
+                <StackPanel Spacing="8">
+                    <TextBlock Text="Routing" Style="{StaticResource BodyStrongTextBlockStyle}" />
+                    <controls:SettingsCard Header="Exit node"
+                        Description="Route internet traffic through another device in your tailnet. Choose None to use your usual connection.">
+                        <controls:SettingsCard.HeaderIcon><FontIcon Glyph="&#xE774;" /></controls:SettingsCard.HeaderIcon>
+                        <ComboBox x:Name="ExitNodeList" Width="220" PlaceholderText="Select an exit node"
+                            SelectedIndex="{x:Bind CurrentNode, Mode=OneWay}" SelectionChanged="ExitNodeChanged"
+                            AutomationProperties.Name="Exit node" />
+                    </controls:SettingsCard>
+                    <HyperlinkButton Content="About exit nodes" Padding="0" HorizontalAlignment="Left"
+                        NavigateUri="https://tailscale.com/kb/1103/exit-nodes" />
+                </StackPanel>
+                <StackPanel Spacing="8">
+                    <TextBlock Text="Network preferences" Style="{StaticResource BodyStrongTextBlockStyle}" />
+                    <controls:SettingsCard Header="Allow incoming connections"
+                        Description="Let other devices connect to this device over Tailscale.">
+                        <controls:SettingsCard.HeaderIcon><FontIcon Glyph="&#xE72E;" /></controls:SettingsCard.HeaderIcon>
+                        <ToggleSwitch x:Name="IncomingTrafficSwitch" MinWidth="0"
+                            IsOn="{x:Bind IncomingTrafficEnabled, Mode=TwoWay}" Toggled="UpdatePrefsShields"
+                            AutomationProperties.Name="Allow incoming connections" />
+                    </controls:SettingsCard>
+                    <controls:SettingsCard Header="Use Tailscale DNS"
+                        Description="Use your tailnet's DNS settings, including MagicDNS and split DNS.">
+                        <controls:SettingsCard.HeaderIcon><FontIcon Glyph="&#xE774;" /></controls:SettingsCard.HeaderIcon>
+                        <ToggleSwitch x:Name="DnsSwitch" MinWidth="0"
+                            IsOn="{x:Bind TailscaleDnsEnabled, Mode=TwoWay}" Toggled="UpdatePrefsDns"
+                            AutomationProperties.Name="Use Tailscale DNS" />
+                    </controls:SettingsCard>
+                    <controls:SettingsCard Header="Accept subnet routes"
+                        Description="Reach networks shared by subnet routers in your tailnet.">
+                        <controls:SettingsCard.HeaderIcon><FontIcon Glyph="&#xE968;" /></controls:SettingsCard.HeaderIcon>
+                        <ToggleSwitch x:Name="SubnetRoutesSwitch" MinWidth="0"
+                            IsOn="{x:Bind SubnetRoutesEnabled, Mode=TwoWay}" Toggled="UpdatePrefsRoutes"
+                            AutomationProperties.Name="Accept subnet routes" />
+                    </controls:SettingsCard>
+                </StackPanel>
+                <controls:SettingsExpander x:Name="AdvancedSettingsExpander" Header="Advanced settings"
+                    Description="Share this device's internet connection.">
+                    <controls:SettingsExpander.HeaderIcon><FontIcon Glyph="&#xE713;" /></controls:SettingsExpander.HeaderIcon>
+                    <controls:SettingsExpander.Items>
+                        <controls:SettingsCard Header="Advertise as an exit node"
+                            Description="Offer this device as an exit node so other devices can route internet traffic through it.">
+                            <ToggleSwitch x:Name="AdvertiseExitNodeSwitch" MinWidth="0"
+                                IsOn="{x:Bind AdvertiseExitNodeEnabled, Mode=OneWay}" Toggled="UpdatePrefsAdvertiseExitNode"
+                                AutomationProperties.Name="Advertise as an exit node" />
+                        </controls:SettingsCard>
+                    </controls:SettingsExpander.Items>
+                </controls:SettingsExpander>
+                <controls:SettingsExpander x:Name="AboutExpander" Header="About" Description="Tailscale Client">
+                    <controls:SettingsExpander.HeaderIcon><FontIcon Glyph="&#xE946;" /></controls:SettingsExpander.HeaderIcon>
+                    <controls:SettingsExpander.Items>
+                        <controls:SettingsCard Header="Version">
+                            <TextBlock Text="{x:Bind VersionText, Mode=OneTime}" TextWrapping="Wrap" />
+                        </controls:SettingsCard>
+                        <controls:SettingsCard Header="Original project" Description="Created by xirreal">
+                            <HyperlinkButton Content="GitHub" NavigateUri="https://github.com/uwu/tailscale-client" />
+                        </controls:SettingsCard>
+                        <controls:SettingsCard Header="License">
+                            <HyperlinkButton Content="MIT License" NavigateUri="https://github.com/uwu/tailscale-client/blob/main/LICENSE.txt" />
+                        </controls:SettingsCard>
+                    </controls:SettingsExpander.Items>
+                </controls:SettingsExpander>
             </StackPanel>
-        </StackPanel>
+        </Grid>
     </ScrollViewer>
 </Page>
