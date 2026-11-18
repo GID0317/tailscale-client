@@ -38,8 +38,8 @@ jobs:
       - name: Build x64 and ARM64
         run: |
           dotnet restore
-          dotnet msbuild TailscaleClient.csproj -t:Rebuild -p:Platform=x64 -p:Configuration=Release -p:OutDir="./dist/x64/"
-          dotnet msbuild TailscaleClient.csproj -t:Rebuild -p:Platform=arm64 -p:Configuration=Release -p:OutDir="./dist/arm64/"
+          dotnet publish TailscaleClient.csproj -p:Platform=x64 -c Release -r win-x64 --self-contained true -o ./dist/x64/
+          dotnet publish TailscaleClient.csproj -p:Platform=arm64 -c Release -r win-arm64 --self-contained true -o ./dist/arm64/
 
       - name: Write version to file, trim trailing newline
         run: |
@@ -63,9 +63,14 @@ jobs:
         with:
           name: dist
 
-      - name: Install packaging tools
+      - name: Set up .NET for packaging
+        uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: "9.x"
+
+      - name: Install Velopack
         run: |
-          dotnet tool install -g vpk
+          dotnet tool install -g vpk --version 0.0.1053
 
       - name: Sync vpk to current version
         run: |
@@ -74,11 +79,11 @@ jobs:
 
       - name: Package x64
         run: |
-          vpk [win] pack --packId TailscaleClient --packVersion "$(cat ./version.txt | tr -d '\r\n')" --packDir ./x64 --channel win-x64 --framework net8.0-x64-runtime -y
+          vpk [win] pack --packId TailscaleClient --packVersion "$(cat ./version.txt | tr -d '\r\n')" --packDir ./x64 --channel win-x64 --runtime win-x64 -y
 
       - name: Package arm64
         run: |
-          vpk [win] pack --packId TailscaleClient --packVersion "$(cat ./version.txt | tr -d '\r\n')" --packDir ./arm64 --channel win-arm64 --framework net8.0-arm64-runtime -y
+          vpk [win] pack --packId TailscaleClient --packVersion "$(cat ./version.txt | tr -d '\r\n')" --packDir ./arm64 --channel win-arm64 --runtime win-arm64 -y
 
       - name: Upload to R2
         env:

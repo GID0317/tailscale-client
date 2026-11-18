@@ -5,7 +5,7 @@
 		<TargetFramework>net8.0-windows10.0.22000.0</TargetFramework>
 		<Platforms>x64;arm64</Platforms>
 		<UseWinUI>true</UseWinUI>
-		<WindowsAppSDKSelfContained>false</WindowsAppSDKSelfContained>
+		<WindowsAppSDKSelfContained>true</WindowsAppSDKSelfContained>
 		<WindowsPackageType>None</WindowsPackageType>
 		<EnableMsixTooling>true</EnableMsixTooling>
 		<ApplicationManifest>app.manifest</ApplicationManifest>
@@ -56,5 +56,9 @@
 
 	<ItemGroup>
 	  <PRIResource Remove="Dist\**" />
+	</ItemGroup>
+
+	<ItemGroup>
+	  <Content Update="Assets\**\*.png;Assets\**\*.ico" CopyToPublishDirectory="PreserveNewest" />
 	</ItemGroup>
 </Project>

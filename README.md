@@ -37,15 +37,21 @@ Portable versions are also available in [releases](https://github.com/uwu/tailsc
    - Visual Studio 2022
    - Windows 10 21H1 or later
    - Windows SDK 22000.194 or later
-   - Windows App SDK 1.6
+   - Windows App SDK 1.7 (restored by NuGet)
    - .NET 8.0 SDK
 1. Clone the repository
-2. Open the solution in Visual Studio 2022
-3. Build the solution and run
+2. Open `TailscaleClient.csproj` in Visual Studio 2022
+3. Build the project and run
 
-> [!WARNING]
-> To install manually, you will need to sideload the msix package. This means building the package, publishing locally (either via the Create App Package wizard or the Publish wizard).
-> You MUST install the certificate you used to sign the package on your device, or it will not install.
+Release packages use Velopack. They do not require MSIX sideloading or installing a signing certificate.
+
+To build a portable folder with .NET and the Windows App Runtime included:
+
+```powershell
+dotnet publish TailscaleClient.csproj -p:Platform=x64 -c Release -r win-x64 --self-contained true -o ./dist/x64/
+```
+
+For ARM64, use `Platform=arm64`, `win-arm64`, and `./dist/arm64/`. Distribute the entire published folder, including its DLLs and resource files. The Tailscale daemon must still be installed separately.
 
 ## Contributing
 Contributions are welcome! Please open an issue or pull request if you have any suggestions or changes.
