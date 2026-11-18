@@ -1,14 +1,8 @@
-# Tailscale Client
-A modern, WinUI3-based Tailscale client for Windows.
+# Tailscale Fluent
 
-This project was born out of wanting to mess around with WinUI3, and the fact that the Tailscale Windows client looks... not great compared to MacOS.
-It aims to provide a modern, clean, and feature-rich Tailscale client for Windows while being fully open source, unlike the official one.
+Tailscale Fluent is a community-maintained WinUI 3 desktop frontend for [Tailscale](https://tailscale.com/) on Windows. It continues [Tailscale Client](https://github.com/uwu/tailscale-client) by xirreal.
 
-> [!IMPORTANT]
-> Not all features (even somewhat basic ones!) are implemented at this time. This is a work in progress.
-
-> [!WARNING]
-> This does not replace the Tailscale daemon. This is just the client UI meant to replace/integrate the Tailscale tray icon app.
+Install [Tailscale for Windows](https://tailscale.com/download/windows) and keep its service running. Tailscale Fluent uses that service to manage your connection and tailnet.
 
 ## Features
 - [x] Account switching
@@ -17,20 +11,13 @@ It aims to provide a modern, clean, and feature-rich Tailscale client for Window
 - [x] Netmap view (devices page)
 - [x] Device details and copy (such as IP, domain, etc.)
 - [x] Exit nodes
-- [x] Settings (Run unattended, allow Tailscale DNS, accept subnets)
+- [x] Network preferences for incoming connections, Tailscale DNS, and subnet routes
+- [x] Light, dark, and system themes with top or left navigation
 - [ ] Taildrop
 
-### Preview
+## Portable preview
 
-<p style="display:flex;justify-content:center;column-gap:8%;">
-  <img style="text-align:center" src="https://raw.githubusercontent.com/uwu/tailscale-client/refs/heads/main/Publishing/login.png" width="30%" />
-  <img style="text-alignt:center" src="https://raw.githubusercontent.com/uwu/tailscale-client/refs/heads/main/Publishing/preview.png" width="30%" />
-</p>
-
-## Installation
-
-Grab the installer from the [CDN x64](https://tsc.xirreal.dev/TailscaleClient-win-x64-Setup.exe)/[CDN arm64](https://tsc.xirreal.dev/TailscaleClient-win-arm64-Setup.exe) or from the [latest release](https://github.com/uwu/tailscale-client/releases/latest).
-Portable versions are also available in [releases](https://github.com/uwu/tailscale-client/releases/latest) without automatic updates.
+Choose the x64 or ARM64 ZIP from [Tailscale Fluent releases](https://github.com/GID0317/tailscale-client/releases). Extract the entire archive into a folder, then run `TailscaleClient.exe` from that folder. Download and extract a newer archive to update.
 
 ## Building and running
 0. Prerequisites
@@ -42,8 +29,6 @@ Portable versions are also available in [releases](https://github.com/uwu/tailsc
 1. Clone the repository
 2. Open `TailscaleClient.csproj` in Visual Studio 2022
 3. Build the project and run
-
-Release packages use Velopack. They do not require MSIX sideloading or installing a signing certificate.
 
 To build a portable folder with .NET and the Windows App Runtime included:
 
@@ -57,7 +42,7 @@ For ARM64, use `Platform=arm64`, `win-arm64`, and `./dist/arm64/`. Distribute th
 Contributions are welcome! Please open an issue or pull request if you have any suggestions or changes.
 
 ## License
-This project is licensed under the MIT License. See the `LICENSE` file for more information.
+This project is licensed under the [MIT License](LICENSE.txt). See [third-party notices](THIRD-PARTY-NOTICES.txt) for the WinUI Gallery CopyButton attribution.
 
 ## Acknowledgements
 - [Tailscale](https://tailscale.com), for making Tailscale open-source

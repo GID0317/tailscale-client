@@ -14,6 +14,8 @@
 		<StartupObject>TailscaleClient.Program</StartupObject>
 		<DefineConstants>$(DefineConstants);DISABLE_XAML_GENERATED_MAIN</DefineConstants>
 		<AssemblyName>TailscaleClient</AssemblyName>
+		<Product>Tailscale Fluent</Product>
+		<Description>A community WinUI client for Tailscale on Windows.</Description>
 		<ApplicationIcon>Assets\Icons\AppIconBase-Dark.ico</ApplicationIcon>
 	</PropertyGroup>
 
@@ -34,7 +36,6 @@
 		  <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
 		</PackageReference>
 		<PackageReference Include="QRCoder" Version="1.6.0" />
-		<PackageReference Include="Velopack" Version="0.0.1053" />
 		<PackageReference Include="WinUIEx" Version="2.5.1" />
 	</ItemGroup>
 
@@ -61,5 +62,6 @@
 
 	<ItemGroup>
 	  <Content Update="Assets\**\*.png;Assets\**\*.ico" CopyToPublishDirectory="PreserveNewest" />
+	  <None Update="LICENSE.txt;THIRD-PARTY-NOTICES.txt" CopyToPublishDirectory="PreserveNewest" />
 	</ItemGroup>
 </Project>

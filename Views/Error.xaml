@@ -2,10 +2,11 @@
 <Page x:Class="TailscaleClient.Views.Error"
     xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+    xmlns:app="using:TailscaleClient"
     xmlns:local="using:TailscaleClient.Views" Loaded="Page_Loaded">
     <Grid>
         <Grid.RowDefinitions><RowDefinition Height="Auto" /><RowDefinition Height="*" /></Grid.RowDefinitions>
-        <TitleBar x:Name="AppTitleBar" Title="Tailscale Client" IconSource="{ThemeResource AppTitleBarIcon}" />
+        <TitleBar x:Name="AppTitleBar" Title="{x:Bind app:Constants.AppDisplayName}" IconSource="{ThemeResource AppTitleBarIcon}" />
         <ScrollViewer Grid.Row="1" HorizontalScrollMode="Disabled" HorizontalScrollBarVisibility="Disabled">
             <StackPanel Margin="32" MaxWidth="520" Spacing="16" HorizontalAlignment="Center">
                 <FontIcon Glyph="&#xE774;" FontSize="32" HorizontalAlignment="Left" Margin="0,24,0,0" />
